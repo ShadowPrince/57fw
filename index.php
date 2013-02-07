@@ -10,30 +10,25 @@ spl_autoload_register(function ($classname) {
     include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
 
+echo '<pre>';
 $e = new Core\Engine(new Config\Engine());
-
-$e->register('router', (new Routing\Router($e)));
-$e->register('http', (new Http\Http($e)));
 
 class MM extends Orm\Manager {
     public function init() {
-        $this->backend = (new Orm\Backend\MySQL($e));
+        $this->backend = (new Orm\Backend\MySQL($e, [
+            'user' => 'root',
+            'password' => '1',
+            'host' => 'localhost',
+            'database' => '57fw',
+        ]));
     }
 }
 
-class M extends Orm\Model {
-    public $table = 'test';
-    public function init() {
-        $this->id = new Orm\Field\PrimaryKey();
-        $this->name = new Orm\Field\Field();
-        $this->text = new Orm\Field\Field();
-    }
-}
-
-
-$m = new M();
-$mm = new MM(M);
-print_r($mm->get(1));
+$e->register('router', (new Routing\Router($e)));
+$e->register('http', (new Http\Http($e)));
+$e->register('manager', function ($model) {
+    return new MM($model);
+});
 
 $e->router()->register('#(?P<a>[^,]+),(?P<b>[^,]+)#', function ($e, $b) {
     return $e->http()->getRequestPath();
