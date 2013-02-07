@@ -56,7 +56,6 @@ class MySQL implements GeneralBackend {
     }
 
     public function executeQuery($qw) {
-        echo $qw;
         $res = mysql_query($qw) or die(mysql_error());
         return $res;
     }

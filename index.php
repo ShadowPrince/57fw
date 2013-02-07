@@ -10,31 +10,11 @@ spl_autoload_register(function ($classname) {
     include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
 
-echo '<pre>';
-$e = new Core\Engine(new Config\Engine());
-
-class MM extends Orm\Manager {
-    public function init() {
-        $this->backend = (new Orm\Backend\MySQL($e, [
-            'user' => 'root',
-            'password' => '1',
-            'host' => 'localhost',
-            'database' => '57fw',
-        ]));
-    }
-}
-
+$e = new \Core\Engine(new Config\Engine());
 $e->register('router', (new Routing\Router($e)));
 $e->register('http', (new Http\Http($e)));
 $e->register('manager', function ($model) {
-    return new MM($model);
+    return new \Config\ConnectedManager($model);
 });
 
-$e->router()->register('#(?P<a>[^,]+),(?P<b>[^,]+)#', function ($e, $b) {
-    return $e->http()->getRequestPath();
-});
-
-$lvls = array(EL_PRE, EL_REQUEST, EL_RESPONSE);
-foreach ($lvls as $lvl)
-    echo $e->proceedLevel($lvl);
-
+$e->proceed();

@@ -15,6 +15,12 @@ class Engine {
             return $this->service($func);
     }
 
+    public function proceed() {
+        $lvls = array(EL_PRE, EL_REQUEST, EL_RESPONSE);
+        foreach ($lvls as $lvl)
+            echo $this->proceedLevel($lvl);
+    }
+
     public function proceedLevel($lvl) {
         $responses = array();
         if (count($this->apps[$lvl])) 
