@@ -5,23 +5,69 @@ class QuerySet implements \Iterator {
     protected $set;
     protected $getter;
     protected $simpleList;
+    protected $limit;
 
-    public function __construct($manager, $set, $simpleList=false) {
+    public function __construct($getter, $set, $simpleList=false) {
         $this->set = $set;
         $this->simpleList = $simpleList;
-        if ($this->simpleList)
-            $this->getter = array($manager, 'buildInstance');
-        else
-            $this->getter = array($manager, 'get');
+        $this->getter = $getter;
     }
 
     /**
-     * Various methods for Iterator
+     * Get length of query set
+     * @return int
      */
     public function len() {
         return count($this->set);
     }
 
+    /**
+     * Set query set's limit
+     * @param int
+     * @return \Orm\QuerySet
+     */
+    public function limit($n) {
+        $this->limit = $n;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getSet() {
+        return $this->set;
+    }
+
+    /**
+     * Implode array or QuerySet to string
+     * @param mixed
+     * @return array
+     */
+    public static function implode($ar) {
+        if (is_array($ar)) 
+            return implode(':', $ar);
+        else if ($ar instanceof \Orm\QuerySet) 
+            return implode(':', $ar->set);
+    }
+
+    /**
+     * Explode string to QuerySet's set
+     * @param string
+     * @return array
+     */
+    public static function explode($str) {
+        $ar = explode(':', $str);
+        $result = array();
+        if ($ar) foreach ($ar as $id) {
+            $result[]['id'] = $id;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Various methods for Iterator
+     */
     public function get($id) {
         return call_user_func_array($this->getter, array($id));
     }
@@ -50,6 +96,8 @@ class QuerySet implements \Iterator {
 
     public function valid() {
         $key = key($this->set);
+        if ($this->limit && $key >= $this->limit)
+            return false;
         $var = ($key !== NULL && $key !== FALSE);
         return $var;
     }

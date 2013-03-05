@@ -60,11 +60,13 @@ class MySQL implements GeneralBackend {
         if ($fields) foreach ($fields as $field) {
             $prep_fields[] = $this->provideField($field); 
         }
-        $this->executeQuery($this->buildFQuery(
+
+        $x = ($this->buildFQuery(
             'CREATE TABLE IF NOT EXISTS %s (%s)',
             $manager->getTable() . '_tmp',
             implode(', ', $prep_fields)
         )); 
+        mysql_query($x) or die(mysql_error());
 
         if ($this->tableExists($manager->getTable())) {
             $cols_old = $this->getColumns($manager->getTable());
@@ -133,21 +135,23 @@ class MySQL implements GeneralBackend {
 
         } 
 
-        $this->executeQuery($this->buildFQuery(
-            'DROP TABLE %s',
-            $manager->getTable() . '_tmp'
-        )); 
-
-        if ($sql) foreach ($sql as $qw) {
-            if ($opts['sql'])
-                $print_callback('  ' . $qw);
-            else
-                $this->executeQuery($qw);
-        } else
+        if ($sql) {
+            foreach ($sql as $qw) {
+                if ($opts['sql'])
+                    $print_callback('  ' . $qw);
+                else
+                    $this->executeQuery($qw);
+            }
+        } else {
             $print_callback(sprintf(
                 'Table for app %s is up-to-date',
                 $manager->getModel()
             ));
+        }
+        $this->executeQuery($this->buildFQuery(
+            'DROP TABLE IF EXISTS %s',
+            $manager->getTable() . '_tmp'
+        )); 
 
     }
 
@@ -189,7 +193,7 @@ class MySQL implements GeneralBackend {
 
     /**
      * Fetch query result to rows array
-     * @var mixed
+     * @param mixed
      * @return array
      */
     protected function fetchArrayResult($res) {
@@ -201,7 +205,7 @@ class MySQL implements GeneralBackend {
 
     /**
      * Fetch query result to single row array
-     * @var mixed
+     * @param mixed
      * @return array
      */
     protected function fetchSingleResult($res) {
@@ -222,7 +226,7 @@ class MySQL implements GeneralBackend {
 
     /**
      * Escape array or string
-     * @var mixed
+     * @param mixed
      * @return mixed
      */
     public function escape($mixed) {
@@ -237,7 +241,7 @@ class MySQL implements GeneralBackend {
 
     /**
      * Implode $kv for "where" part of query
-     * @var array
+     * @param array
      * @return array
      */
     public function whereParamsImplode($kv) {
@@ -262,7 +266,7 @@ class MySQL implements GeneralBackend {
 
     /**
      * Implode $kv for "set" part of query
-     * @var array
+     * @param array
      * @return array
      */
     public function paramsImplode($kv) {

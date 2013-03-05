@@ -20,13 +20,13 @@ abstract class Manager {
     public function find($kv) {
         $php_is_dummy = $this->getModel();
         if ($php_is_dummy::$pkey) {
-            return new \Orm\QuerySet($this,
+            return new \Orm\QuerySet(array($this, 'get'),
                 $this->backend->select($this, $kv, array(
                     $php_is_dummy::$pkey
                 ))
             );
         } else {
-            return new \Orm\QuerySet($this,
+            return new \Orm\QuerySet(array($this, 'buildInstance'),
                 $this->backend->select($this, $kv, array(
                     '*'
                 )), true
@@ -75,12 +75,26 @@ abstract class Manager {
      * Prepare database for model
      */
     public function prepare($opts, $print_callback) {
+        $cls = $this->getModel();
+        if (!isset($cls::$pkey)) {
+            $fields = $this->getModelInstance()->getFields();
+            if ($fields) foreach ($fields as $f) {
+                if ($f instanceof \Orm\Field\PrimaryKey) {
+                    $print_callback(sprintf(
+                        'Model %s has primary key %s, but static variable $pk not setted!'
+                        . PHP_EOL . ' (!) THAT MY CAUSE ERRORS!', 
+                        $this->getModel(),
+                        $f->getName()
+                    ));
+                }
+            }
+        }
         $this->backend->prepare($this, $opts, $print_callback);
     }
 
     /**
      * Save (insert or update) instance
-     * @var \Orm\Model
+     * @param \Orm\Model
      */
     public function save($instance) {
         try {
@@ -124,6 +138,26 @@ abstract class Manager {
         return $this->model;
     }
 
+    public function getModelInstance() {
+        $cls = $this->getModel();
+        if (!isset($this->modelInstance))
+            $this->modelInstance = new $cls();
+        return $this->modelInstance;
+    }
+
+    public static function manGetter($e, $model, $man) {
+        if (is_string($model)) {
+
+        } else if ($model instanceof \Orm\Model) {
+            $model = get_class($model);
+        }
+
+        if (!isset($e->cache['man_' . $model]))
+            $e->cache['man_' . $model] = new $man($e, $model);
+
+        return $e->cache['man_' . $model];
+    }
+
     /**
      * Create backend by string class var
      */
@@ -140,6 +174,9 @@ abstract class Manager {
     protected function value($instance) {
         if ($instance instanceof \Orm\Model) {
             return $instance->{$instance::$pkey};
+        }
+        if ($instance instanceof \Orm\QuerySet) {
+            return \Orm\QuerySet::implode($instance);
         }
         return $instance;
     }

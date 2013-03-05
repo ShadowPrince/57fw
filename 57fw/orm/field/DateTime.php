@@ -7,7 +7,7 @@ class DateTime extends Field {
     protected $format = 'Y-m-d H:i:s';
 
     public function getValue() {
-        if (!$this->value && $this->auto)
+        if (!$this->value && $this->param('auto'))
             $this->value = (new \DateTime())->format($this->format);
         $dt = \DateTime::createFromFormat($this->format, $this->value);
 

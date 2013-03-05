@@ -11,8 +11,8 @@ class Router {
 
     /**
      * Register callback
-     * @var string
-     * @var mixed 
+     * @param string
+     * @param mixed 
      */
     public function register($regex, $instance) {
         $this->routings[$regex] = $instance;
@@ -20,7 +20,7 @@ class Router {
 
     /**
      * Find instance by $url and return callback with args
-     * @var string
+     * @param string
      * @return array
      */
     public function find($url) {
@@ -39,9 +39,9 @@ class Router {
 
     /**
      * Call instance (callback with args)
-     * @var mixed
-     * @var array
-     * @var array
+     * @param mixed
+     * @param array
+     * @param array
      * @return mixed
      */
     public function callInstance($ins, $args, $named) {
@@ -56,14 +56,16 @@ class Router {
 
     /**
      * Proceed router for $url
-     * @var string
+     * @param string
      * @return mixed
      */
     public function proceed($url) {
         $data = $this->find($url);
-        if ($data)
-            return $this->callInstance($data[0], $data[2], $data[1]);
-        else
-            return '404';
+        if ($data) {
+            if ($data[1])
+                return $this->callInstance($data[0], $data[3], $data[1]);
+            else
+                return $this->callInstance($data[0], $data[2], $data[1]);
+        } else return '404';
     }
 }

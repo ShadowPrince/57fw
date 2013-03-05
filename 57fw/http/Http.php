@@ -13,6 +13,6 @@ class Http {
     }
 
     public function getRequestPath() {
-        return $_SERVER['PATH_INFO'];
+    //    return $_SERVER['PATH_INFO'];
     }
 }

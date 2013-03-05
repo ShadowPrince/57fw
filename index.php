@@ -23,17 +23,11 @@ $e = new \Core\Engine(new Config\Engine());
 
 $e->register('router', (new Routing\Router($e)));
 $e->register('http', (new Http\Http($e)));
-$e->register('man', function ($model) {
-    global $e;
-    if (is_string($model)) {
-         
-    } else if ($model instanceof \Orm\Model) {
-        $model = get_class($model);
-    }
-    return new \Config\ConnectedManager($e, $model);
+$e->register('man', function ($model) { global $e;
+    return \Orm\Manager::manGetter($e, $model, '\Config\ConnectedManager');
 });
 
-if (!$cli)
+if (!isset($cli)) {
     $e->proceed();
-
-print microtime(1) - START;
+    print microtime(1) - START;
+}

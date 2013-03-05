@@ -49,9 +49,9 @@ class Engine {
         return $this->config;
     }
 
-    public static function fatalErrorHandler($errno, $errstr, $errfile, $errline) {
-        if ($errno === E_RECOVERABLE_ERROR) {
-            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+    public static function fatalErrorHandler($no, $str, $file, $line) {
+        if ($no === E_RECOVERABLE_ERROR) {
+            throw new \ErrorException($str, $no, 0, $file, $line);
         }
         return false;
     }

@@ -3,17 +3,17 @@ namespace Orm\Field;
 
 abstract class Field {
     protected $type, $val;
+    protected $params = array();
 
     public function __construct($params=null) {
-        $this->applyParams();
+        $this->params = $params;
     }
 
-    public function applyParams() {
-        if ($params) foreach ($params as $k => $v) {
-            $this->$k = $v;
-        }
+    public function param($k) {
+        if (isset($this->params[$k]))
+            return $this->params[$k];
+        else return false;
     }
-
     /**
      * @return string
      */

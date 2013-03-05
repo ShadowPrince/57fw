@@ -4,6 +4,7 @@ namespace Orm\Field;
 class ForeignKey extends KeyField {
     protected $type = 'int';
     protected $value = 0;
+    protected $model;
 
     public function __construct($model) {
         if (is_string($model))
@@ -31,8 +32,15 @@ class ForeignKey extends KeyField {
         if ($this->instance) {
             return $this->instance;
         } else { 
-            $this->instance = $this->manager->get(parent::getValue());
+            if ($this->manager)
+                $this->instance = $this->manager->get(parent::getValue());
+            else
+                return null;
             return $this->instance;
         }
+    }
+
+    public function getModel() {
+        return $this->model;
     }
 }
