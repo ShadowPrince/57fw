@@ -2,13 +2,12 @@
 namespace Config;
 
 class ConnectedManager extends \Orm\Manager {
-    public function init() {
-        $this->backend = (new \Orm\Backend\MySQL($e, [
+    public $backend = "(new \Orm\Backend\MySQL(\$this->e, array(
             'user' => 'root',
             'password' => '1',
             'host' => 'localhost',
             'database' => '57fw',
-        ]));
-    }
-}
+        ) ))
 
+        ";
+}
