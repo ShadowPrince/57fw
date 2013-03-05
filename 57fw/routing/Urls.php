@@ -1,6 +1,9 @@
 <?php
 namespace Routing;
 
+/**
+ * Urls interface for app's Urls
+ */
 interface Urls {
-    public function register($e);
+    public function init($e);
 }

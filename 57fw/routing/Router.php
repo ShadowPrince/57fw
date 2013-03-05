@@ -2,8 +2,9 @@
 namespace Routing;
 
 class Router {
-    private $e;
-    private $routings;
+    protected $routings = array();
+    protected $e;
+
     public function __construct($e) {
         $this->e = $e; 
     }

@@ -23,7 +23,7 @@ $e = new \Core\Engine(new Config\Engine());
 
 $e->register('router', (new Routing\Router($e)));
 $e->register('http', (new Http\Http($e)));
-$e->register('manager', function ($model) {
+$e->register('man', function ($model) {
     global $e;
     if (is_string($model)) {
          

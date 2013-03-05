@@ -2,7 +2,9 @@
 namespace Core;
 
 class Engine {
-    public $config;
+    protected $config;
+    protected $apps;
+
     public function __construct($config) {
         $this->config = $config;
         $this->apps = $config->apps();
@@ -35,7 +37,24 @@ class Engine {
         return $this->apps[$lvl];
     }
 
-    public function register($name, $instance) {$this->services[$name] = $instance;}
-    public function service($name) {return $this->services[$name];}
-    public function getConfig() {return $this->config;}
+    public function register($name, $instance) {
+        $this->services[$name] = $instance;
+    }
+
+    public function service($name) {
+        return $this->services[$name];
+    }
+
+    public function getConfig() {
+        return $this->config;
+    }
+
+    public static function fatalErrorHandler($errno, $errstr, $errfile, $errline) {
+        if ($errno === E_RECOVERABLE_ERROR) {
+            throw new \ErrorException($errstr, $errno, 0, $errfile, $errline);
+        }
+        return false;
+    }
 }
+
+set_error_handler('\Core\Engine::fatalErrorHandler');

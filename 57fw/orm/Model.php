@@ -18,6 +18,8 @@ abstract class Model {
      * @return mixed
      */
     public function __get($attr) {
+        if (!isset($this->fields[$attr]))
+            throw new \Orm\Ex\FieldNotFoundException($attr);
         return $this->fields[$attr]->getValue();
     }
 
@@ -80,11 +82,20 @@ abstract class Model {
     public function getFields() {
         return $this->fields;
     }
+
+    /**
+     * Get field by name
+     * @param string
+     * @return \Orm\Field\Field
+     */
+    public function getField($name) {
+        return $this->fields[$name];
+    }
     
     /**
      * createFields by model vars
      */
-    private function createFields() {
+    protected function createFields() {
         foreach (get_object_vars($this) as $k => $v) {
             if (is_string($v) && substr($v, 0, 3) == 'new') {
                 $eval = '$this->fields[$k] = ' . $v . ';';

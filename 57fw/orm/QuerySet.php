@@ -2,9 +2,17 @@
 namespace Orm;
 
 class QuerySet implements \Iterator {
-    public function __construct($manager, $set) {
+    protected $set;
+    protected $getter;
+    protected $simpleList;
+
+    public function __construct($manager, $set, $simpleList=false) {
         $this->set = $set;
-        $this->getter = array($manager, 'get');
+        $this->simpleList = $simpleList;
+        if ($this->simpleList)
+            $this->getter = array($manager, 'buildInstance');
+        else
+            $this->getter = array($manager, 'get');
     }
 
     /**
@@ -23,8 +31,13 @@ class QuerySet implements \Iterator {
     }
 
     public function current() {
-        $id = current($this->set)['id'];
-        return call_user_func_array($this->getter, array($id));
+        if ($this->simpleList) {
+            $args = array(current($this->set));
+        } else {
+            $args = array(current($this->set)['id']);
+        }
+
+        return call_user_func_array($this->getter, $args);
     }
 
     public function key() {

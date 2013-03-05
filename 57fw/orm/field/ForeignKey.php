@@ -2,11 +2,15 @@
 namespace Orm\Field;
 
 class ForeignKey extends KeyField {
-    public $type = 'int';
-    public $value = 0;
+    protected $type = 'int';
+    protected $value = 0;
 
     public function __construct($model) {
-        $this->model = $model; 
+        if (is_string($model))
+            $this->model = $model; 
+        else
+            $this->model = get_class($model);
+
         parent::__construct();
     }
 
@@ -18,9 +22,9 @@ class ForeignKey extends KeyField {
         if ($ins instanceof \Orm\Model) {
             $this->instance = $ins;
             return parent::setValue($ins->{$ins::$pkey});
-        } else {
+        } else if ((string) (int) $ins == $ins) {
             return parent::setValue($ins);
-        }
+        } else throw new \Orm\Ex\FieldValueException($this, $ins);
     }
 
     public function getValue() {

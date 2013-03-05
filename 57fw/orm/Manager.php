@@ -2,9 +2,13 @@
 namespace Orm;
 
 abstract class Manager {
+    protected $e;
+    protected $model;
+    protected $backend;
+
     public function __construct($e, $model) {
         $this->e = $e;
-        $this->modelClass = $model;
+        $this->model = $model;
         $this->createBackend();
     } 
 
@@ -14,11 +18,20 @@ abstract class Manager {
      * @return \Orm\QuerySet
      */
     public function find($kv) {
-        $php_is_dummy = $this->modelClass;
-        $data = $this->backend->select($this, $kv, array(
-            $php_is_dummy::$pkey
-        ));
-        return new \Orm\QuerySet($this, $data);
+        $php_is_dummy = $this->getModel();
+        if ($php_is_dummy::$pkey) {
+            return new \Orm\QuerySet($this,
+                $this->backend->select($this, $kv, array(
+                    $php_is_dummy::$pkey
+                ))
+            );
+        } else {
+            return new \Orm\QuerySet($this,
+                $this->backend->select($this, $kv, array(
+                    '*'
+                )), true
+            );
+        }
     }
 
     /**
@@ -28,21 +41,31 @@ abstract class Manager {
      * @return \Orm\Model
      */
     public function get($val) {
-        $php_is_dummy = $this->modelClass;
+        $php_is_dummy = $this->getModel();
+        if (!$php_is_dummy::$pkey)
+            throw new \Orm\Ex\PKeyRequiredException('get');
+        
         $data = $this->backend->select($this, array(
             "`%s` = '%d'" => array($php_is_dummy::$pkey, $val)
         ), array('*'));
+
         if (!$data)
-            throw new \Exception("Object not found");
+            throw new \Orm\Ex\RowNotFoundException('PKey = ' . $val);
         else
             $data = $data[0];
-        $instance = new $this->modelClass(); 
+
+        return $this->buildInstance($data);
+    }
+
+    public function buildInstance($data) {
+        $cls = $this->getModel();
+        $instance = new $cls();
         foreach ($data as $k => $v) {
-            if ($instance->fields[$k] instanceof \Orm\Field\KeyField) {
-                $instance->fields[$k]->setupManager(array($this->e, 'manager'));
+            if ($instance->getField($k) instanceof \Orm\Field\KeyField) {
+                $instance->getField($k)->setupManager(array($this->e, 'man'));
             }
-            if ($instance->fields[$k] instanceof \Orm\Field\Field) {
-                $instance->fields[$k]->setValue($v);
+            if ($instance->getField($k) instanceof \Orm\Field\Field) {
+                $instance->getField($k)->forceValue($v);
             }  
         } 
         return $instance;
@@ -51,8 +74,8 @@ abstract class Manager {
     /**
      * Prepare database for model
      */
-    public function prepare() {
-        $this->backend->prepare($this);
+    public function prepare($opts, $print_callback) {
+        $this->backend->prepare($this, $opts, $print_callback);
     }
 
     /**
@@ -89,14 +112,22 @@ abstract class Manager {
      * @return string
      */
     public function getTable() {
-        $php_is_dummy = $this->modelClass;
+        $php_is_dummy = $this->getModel();
         return $php_is_dummy::$table;
+    }
+
+    /**
+     * Get model class
+     * @return string
+     */
+    public function getModel() {
+        return $this->model;
     }
 
     /**
      * Create backend by string class var
      */
-    private function createBackend() {
+    protected function createBackend() {
         $eval = '$this->backend = ' . $this->backend . ';';
         eval($eval);
     }
@@ -106,7 +137,7 @@ abstract class Manager {
      * @param mixed
      * @return string
      */
-    private function value($instance) {
+    protected function value($instance) {
         if ($instance instanceof \Orm\Model) {
             return $instance->{$instance::$pkey};
         }

@@ -37,6 +37,7 @@ interface GeneralBackend {
     /**
      * Prepare db for $manager
      * @var \Orm\Manager
+     * @var array
      */
-    public function prepare($manager);
+    public function prepare($manager, $opts, $print_callback);
 }

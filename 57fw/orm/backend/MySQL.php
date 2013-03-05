@@ -44,29 +44,145 @@ class MySQL implements GeneralBackend {
     }
 
     public function count($manager, $wh) {
-        $this->executeQuery($this->buildFQuery(
+        return $this->fetchArrayResult($this->executeQuery($this->buildFQuery(
             'SELECT COUNT(*) FROM %s WHERE %s',
             $manager->getTable(),
             $wh
-        ));
+        )))['COUNT(*)'];
     }
 
-    public function prepare($manager) {
-        $fields = (new $manager->modelClass)->getFields();
-        if ($fields) foreach ($fields as &$field) {
-           $field = $field->getName() . ' ' . strtoupper($field->getType()); 
+    public function prepare($manager, $opts, $print_callback) {
+        $cls = $manager->getModel();
+        $fields = (new $cls)->getFields();
+        $prep_fields = array();
+        $sql = array();
+
+        if ($fields) foreach ($fields as $field) {
+            $prep_fields[] = $this->provideField($field); 
         }
         $this->executeQuery($this->buildFQuery(
             'CREATE TABLE IF NOT EXISTS %s (%s)',
-            $manager->getTable(),
-            implode(', ', $fields)
+            $manager->getTable() . '_tmp',
+            implode(', ', $prep_fields)
         )); 
+
+        if ($this->tableExists($manager->getTable())) {
+            $cols_old = $this->getColumns($manager->getTable());
+            $cols_new = $this->getColumns($manager->getTable() . '_tmp');
+
+            $cols_add = array();
+            $cols_delete = array();
+            $cols_mod = array();
+
+            foreach ($cols_new as $name => $opt) {
+                if (!isset($cols_old[$name])) {
+                    $cols_add[] = $name;
+                    $sql[] = ($this->buildFQuery(
+                        'ALTER TABLE %s ADD %s',
+                        $manager->getTable(),
+                        $this->provideField($fields[$name])
+                    ));
+                } else if ($cols_old[$name] !== $opt) {
+                    $cols_mod[] = $name; 
+                    $sql[] = ($this->buildFQuery(
+                        'ALTER TABLE %s MODIFY %s',
+                        $manager->getTable(),
+                        $this->provideField($fields[$name])
+                    ));
+                } 
+                if (isset($cols_old[$name])) {
+                    unset($cols_old[$name]);
+                }
+            }
+
+            if ($cols_old) foreach ($cols_old as $name => $opt) {
+                $cols_del[] = $name;
+                $sql[] = ($this->buildFQuery(
+                    'ALTER TABLE %s DROP COLUMN %s',
+                    $manager->getTable(),
+                    $name
+                ));
+            }
+
+            if (count($sql)) {
+                if (!isset($opts['force'])) {
+                    $print_callback(sprintf(
+                        'Table for %s already exists, add -force to modify it. ',
+                        $manager->getModel()
+                    ));
+                    $sql = array();
+                } else {
+                    $print_callback(sprintf(
+                        'Modifying table %s for app %s ...',
+                        $manager->getTable(),
+                        $manager->getModel()
+                    ));
+                }
+            }
+        } else {
+            $print_callback(sprintf(
+                'Creating table %s for app %s ...',
+                $manager->getTable(),
+                $manager->getModel()
+            ));
+            $sql[] = $this->buildFQuery(
+                'ALTER TABLE %s RENAME %s',
+                $manager->getTable() . '_tmp',
+                $manager->getTable()
+            );
+
+        } 
+
+        $this->executeQuery($this->buildFQuery(
+            'DROP TABLE %s',
+            $manager->getTable() . '_tmp'
+        )); 
+
+        if ($sql) foreach ($sql as $qw) {
+            if ($opts['sql'])
+                $print_callback('  ' . $qw);
+            else
+                $this->executeQuery($qw);
+        } else
+            $print_callback(sprintf(
+                'Table for app %s is up-to-date',
+                $manager->getModel()
+            ));
+
+    }
+
+    protected function provideField($field) {
+        return $field->getName() . ' ' . strtoupper($field->getType()); 
+    }
+
+    protected function getColumns($table) {
+        $cols = $this->fetchArrayResult($this->executeQuery($this->buildFQuery(
+            'SHOW COLUMNS FROM %s',
+            $table
+        )));
+        $cols_prep = array();
+        foreach ($cols as $c) {
+            $cols_prep[$c['Field']] = $c;
+        }
+
+        return $cols_prep;
+    }
+
+    /**
+     * @param string
+     * @return bool
+     */
+    protected function tableExists($table) {
+        return count($this->fetchArrayResult($this->executeQuery($this->buildFQuery(
+            'SHOW TABLES LIKE \'%s\'',
+            $table
+        ))));
     }
 
     /**
      * Execute query
      */
-    public function executeQuery($qw) {
+    protected function executeQuery($qw) {
         $res = mysql_query($qw) or die(mysql_error());
         return $res;
     }
@@ -76,7 +192,7 @@ class MySQL implements GeneralBackend {
      * @var mixed
      * @return array
      */
-    public function fetchArrayResult($res) {
+    protected function fetchArrayResult($res) {
         $data = [];
         while ($row = mysql_fetch_assoc($res))
             $data[] = $row;
@@ -88,7 +204,7 @@ class MySQL implements GeneralBackend {
      * @var mixed
      * @return array
      */
-    public function fetchSingleResult($res) {
+    protected function fetchSingleResult($res) {
         return mysql_fetch_array($res);
     }
     

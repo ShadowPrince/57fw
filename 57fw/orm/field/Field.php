@@ -2,6 +2,8 @@
 namespace Orm\Field;
 
 abstract class Field {
+    protected $type, $val;
+
     public function __construct($params=null) {
         $this->applyParams();
     }
@@ -25,8 +27,15 @@ abstract class Field {
      */
     public function getValue() {return $this->value;}
     /**
-     * @param string
+     * @param mixed 
      * @return \Orm\Field\Field
      */
     public function setValue($val) {$this->value = $val; return $this;}
+
+    /**
+     * set field value with no validation (useful when setting values from db)
+     * @param mixed 
+     * @return \Orm\Field\Field
+     */
+    public function forceValue($val) {$this->value = $val; return $this;}
 }

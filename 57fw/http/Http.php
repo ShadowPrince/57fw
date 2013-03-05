@@ -2,7 +2,8 @@
 namespace Http;
 
 class Http {
-    private $e;
+    protected $e;
+
     public function __construct($e) {
         $this->e = $e;
     }
