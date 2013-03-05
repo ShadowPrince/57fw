@@ -8,12 +8,27 @@ class MySQL implements GeneralBackend {
         mysql_select_db($connection['database']);
     }
 
-    public function select($manager, $wh, $fields) {
+    public function select($manager, $wh, $fields, $additions=array()) {
+        $additions_prepared = array();
+        $limit = '';
+        foreach ($additions as $add => &$val) {
+            switch ($add) {
+                case 'limit':
+                    $limit = 'LIMIT ' . $val;
+                    break;
+                case 'order':
+                    $additions_prepared[] = 'ORDER BY ' . $val;
+                    break;
+            } 
+        }
+        $additions_prepared[] = $limit;
+
         return $this->fetchArrayResult($this->executeQuery($this->buildFQuery(
-            'SELECT %s FROM %s WHERE %s', 
+            'SELECT %s FROM %s WHERE %s %s', 
             implode(', ', $fields),
             $manager->getTable(),
-            $this->whereParamsImplode($wh)
+            $this->whereParamsImplode($wh),
+            implode(' ', $additions_prepared)
         )));
     }
 
@@ -197,7 +212,7 @@ class MySQL implements GeneralBackend {
      * @return array
      */
     protected function fetchArrayResult($res) {
-        $data = [];
+        $data = array();
         while ($row = mysql_fetch_assoc($res))
             $data[] = $row;
         return $data;

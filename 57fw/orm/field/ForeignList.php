@@ -18,11 +18,11 @@ class ForeignList extends \Orm\Field\ForeignKey {
             );
         }
 
-        $this->value = \Orm\QuerySet::implode($ids);
+        $this->value = \Orm\ResultSet::implode($ids);
     }
 
     public function getValue() {
-        return new \Orm\QuerySet(array($this->manager, 'get'),
-            \Orm\QuerySet::explode($this->value), false);
+        return new \Orm\ResultSet(array($this->manager, 'get'),
+            \Orm\ResultSet::explode($this->value), false);
     }
 }

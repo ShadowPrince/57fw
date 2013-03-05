@@ -4,7 +4,7 @@ namespace Orm\Field;
 class DateTime extends Field {
     protected $type = 'timestamp';
     protected $value = '';
-    protected $format = 'Y-m-d H:i:s';
+    public static $format = 'Y-m-d H:i:s';
 
     public function getValue() {
         if (!$this->value && $this->param('auto'))
@@ -16,7 +16,7 @@ class DateTime extends Field {
 
     public function setValue($val) {
         if ($val instanceof \DateTime)
-            parent::setValue($val->format($this->format));
+            parent::setValue($val->format(self::$format));
         else try {
             return $this->setValue(new \DateTime($val));
         } catch (\Exception $e) {

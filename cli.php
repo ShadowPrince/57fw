@@ -1,3 +1,4 @@
+#!/usr/bin/env php
 <?php
 $cli = true;
 include 'index.php';

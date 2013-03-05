@@ -32,7 +32,7 @@ class ForeignKey extends KeyField {
         if ($this->instance) {
             return $this->instance;
         } else { 
-            if ($this->manager)
+            if ($this->manager && $this->value)
                 $this->instance = $this->manager->get(parent::getValue());
             else
                 return null;

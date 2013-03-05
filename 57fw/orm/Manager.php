@@ -15,21 +15,34 @@ abstract class Manager {
     /**
      * Find instances by $kv and return queryset
      * @param array
-     * @return \Orm\QuerySet
+     * @return \Orm\ResultSet
      */
-    public function find($kv) {
+    public function find($kv, $additions='') {
         $php_is_dummy = $this->getModel();
+        $additions = $this->unserialize($additions);
+        if (!isset($additions['order'])) {
+            $additions['order'] = $php_is_dummy::$order;
+        }
+
+        foreach ($kv as $k => &$v) {
+            if (is_array($v)) {
+                foreach ($v as &$vv) {
+                    $vv = $this->value($vv); 
+                }
+            } else $v = $this->value($v);
+        }
+
         if ($php_is_dummy::$pkey) {
-            return new \Orm\QuerySet(array($this, 'get'),
+            return new \Orm\ResultSet(array($this, 'get'),
                 $this->backend->select($this, $kv, array(
                     $php_is_dummy::$pkey
-                ))
+                ), $additions)
             );
         } else {
-            return new \Orm\QuerySet(array($this, 'buildInstance'),
+            return new \Orm\ResultSet(array($this, 'buildInstance'),
                 $this->backend->select($this, $kv, array(
                     '*'
-                )), true
+                ), $additions), true
             );
         }
     }
@@ -108,11 +121,14 @@ abstract class Manager {
                 )
             );
         } catch (\Exception $e) {}
+
         $fields = $instance->getFields();
-        $kv = [];
+        $kv = array();
         if ($fields) foreach ($fields as $field) {
+            $field->getValue();
             $kv[$field->getName()] = $this->value($field->getValue());
         }
+
         if (isset($wh)) {
             $this->backend->update($this, $kv, $wh);
         } else {
@@ -166,6 +182,17 @@ abstract class Manager {
         eval($eval);
     }
 
+    protected function unserialize($val) {
+        $arr = array();
+
+        foreach (explode(',', $val) as $v) {
+            $data = explode('=', $v);
+            $arr[trim($data[0])] = trim($data[1]);
+        }
+
+        return $arr;
+    }
+
     /**
      * Get string value of various objects
      * @param mixed
@@ -175,8 +202,11 @@ abstract class Manager {
         if ($instance instanceof \Orm\Model) {
             return $instance->{$instance::$pkey};
         }
-        if ($instance instanceof \Orm\QuerySet) {
-            return \Orm\QuerySet::implode($instance);
+        if ($instance instanceof \Orm\ResultSet) {
+            return \Orm\ResultSet::implode($instance);
+        }
+        if ($instance instanceof \DateTime) {
+            return $instance->format(\Orm\Field\DateTime::$format);
         }
         return $instance;
     }

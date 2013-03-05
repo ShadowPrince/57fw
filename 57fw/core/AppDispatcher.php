@@ -27,10 +27,10 @@ class AppDispatcher implements \Core\EngineDispatcher {
         $realpath = strtolower(str_replace('\\', '/', $path));
         if (substr($realpath, 0, 1) == '/')
             $realpath = substr($realpath, 1); 
-        $classes = [];
+        $classes = array();
         $dir = opendir($realpath);
         if (!$dir)
-            return [];
+            return array();
         while (false !== ($file = readdir($dir))) {
             $info = pathinfo($realpath . '/' . $file);
             if ($info['extension'] == 'php') {
