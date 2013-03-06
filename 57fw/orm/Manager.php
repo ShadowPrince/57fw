@@ -1,13 +1,11 @@
 <?php
 namespace Orm;
 
-abstract class Manager {
-    protected $e;
+abstract class Manager extends \Core\Service {
     protected $model;
     protected $backend;
 
-    public function __construct($e, $model) {
-        $this->e = $e;
+    public function __construct($model) {
         $this->model = $model;
         $this->createBackend();
     } 
@@ -15,10 +13,11 @@ abstract class Manager {
     /**
      * Find instances by $kv and return queryset
      * @param array
-     * @return \Orm\ResultSet
+     * @return \Orm\QuerySet
      */
-    public function find($kv, $additions='') {
-        $php_is_dummy = $this->getModel();
+    public function find() {
+        return $this->backend->getQuerySet($this);
+/*        $php_is_dummy = $this->getModel();
         $additions = $this->unserialize($additions);
         if (!isset($additions['order'])) {
             $additions['order'] = $php_is_dummy::$order;
@@ -45,6 +44,7 @@ abstract class Manager {
                 ), $additions), true
             );
         }
+*/
     }
 
     /**
@@ -161,7 +161,7 @@ abstract class Manager {
         return $this->modelInstance;
     }
 
-    public static function manGetter($e, $model, $man) {
+    public static function manGetter($model, $man) {
         if (is_string($model)) {
 
         } else if ($model instanceof \Orm\Model) {
@@ -169,7 +169,7 @@ abstract class Manager {
         }
 
         if (!isset($e->cache['man_' . $model]))
-            $e->cache['man_' . $model] = new $man($e, $model);
+            $e->cache['man_' . $model] = new $man($model);
 
         return $e->cache['man_' . $model];
     }

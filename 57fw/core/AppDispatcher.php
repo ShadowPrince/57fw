@@ -11,6 +11,12 @@ class AppDispatcher implements \Core\EngineDispatcher {
         $this->urls = $this->namespace . '\\Urls';
     }
 
+    /**
+     * Prepare database for app
+     * @param \Core\Engine
+     * @param array
+     * @param callback 
+     */
     public function prepareDatabase($e, $opts, $print_callback) {
         $this->models = $this->getClasses($this->namespace . '\\Model');
         foreach ($this->models as $model) {
@@ -19,10 +25,27 @@ class AppDispatcher implements \Core\EngineDispatcher {
         }
     }
 
-    public function proceed($e) {
-        (new $this->urls())->init($e);
+    /**
+     * Proceed app
+     * @param \Core\Engine
+     */
+    public function engage($e) {
+        (new $this->urls())->engage($e);
     }
    
+    /**
+     * Get name of app
+     * @return string
+     */
+    public function getName() {
+        return str_replace('\App\\', '', $this->namespace);
+    }
+
+    /**
+     * get all classes at namespace
+     * @param string
+     * @return array
+     */
     protected function getClasses($path) {
         $realpath = strtolower(str_replace('\\', '/', $path));
         if (substr($realpath, 0, 1) == '/')

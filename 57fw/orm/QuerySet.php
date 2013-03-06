@@ -1,57 +1,68 @@
 <?php
 namespace Orm;
 
-class QuerySet implements \Iterator {
-    protected $set;
-    protected $getter;
-    protected $simpleList;
+abstract class QuerySet implements \Iterator {
+    protected $set = array();
+    protected $simple;
     protected $limit;
 
-    public function __construct($getter, $set, $simpleList=false) {
-        $this->set = $set;
-        $this->simpleList = $simpleList;
-        $this->getter = $getter;
-    }
+    /**
+     * Filter queryset
+     * @param string
+     * @param mixed
+     * @return \Orm\QuerySet
+     */
+    abstract function filter($cf, $value);
+    /**
+     * Set queryset limit
+     * @param int
+     * @param int
+     * @return \Orm\QuerySet
+     */
+    abstract function limit($n, $f);
+    /**
+     * Set queryset order
+     * @param string
+     * @param bool
+     * @return \Orm\QuerySet
+     */
+    abstract function order($field, $desc);
+    /**
+     * @return int
+     */
+    abstract function count();
 
     /**
      * Get length of query set
      * @return int
      */
     public function len() {
+        $this->execute();
         return count($this->set);
-    }
-
-    /**
-     * Set query set's limit
-     * @param int
-     * @return \Orm\QuerySet
-     */
-    public function limit($n) {
-        $this->limit = $n;
-        return $this;
     }
 
     /**
      * @return array
      */
     public function getSet() {
+        $this->execute();
         return $this->set;
     }
 
     /**
-     * Implode array or QuerySet to string
+     * Implode array or ResultSet to string
      * @param mixed
      * @return array
      */
     public static function implode($ar) {
         if (is_array($ar)) 
             return implode(':', $ar);
-        else if ($ar instanceof \Orm\QuerySet) 
+        else if ($ar instanceof \Orm\ResultSet) 
             return implode(':', $ar->set);
     }
 
     /**
-     * Explode string to QuerySet's set
+     * Explode string to ResultSet's set
      * @param string
      * @return array
      */
@@ -68,22 +79,26 @@ class QuerySet implements \Iterator {
     /**
      * Various methods for Iterator
      */
-    public function get($id) {
-        return call_user_func_array($this->getter, array($id));
+    public function get($data) {
+        if ($this->simple)
+            return $this->manager->buildInstance($data);
+        else
+            return $this->manager->get($data);
     }
 
     public function rewind() {
+        $this->execute();
         reset($this->set);
     }
 
     public function current() {
-        if ($this->simpleList) {
+        if ($this->simple) {
             $args = array(current($this->set));
         } else {
             $args = array(current($this->set)['id']);
         }
 
-        return call_user_func_array($this->getter, $args);
+        return call_user_func_array(array($this, 'get'), $args);
     }
 
     public function key() {

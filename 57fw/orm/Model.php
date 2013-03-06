@@ -104,5 +104,11 @@ abstract class Model {
                 unset($this->$k);
             }
         }
+
+        $ami = get_called_class();
+        if (!$ami::$table)  
+            $ami::$table = strtolower(
+                array_pop(explode('\\', get_called_class()))
+            );
     }
 }

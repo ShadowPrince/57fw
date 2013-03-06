@@ -4,51 +4,76 @@ namespace Core;
 class Engine {
     protected $config;
     protected $apps;
+    protected $services;
+    protected $cache;
 
-    public function __construct($config) {
-        $this->config = $config;
-        $this->apps = $config->apps();
+    public function __construct() {
     }
 
+    /**
+     * Magick method for services
+     * @param string
+     * @param array
+     * @return mixed
+     */
     public function __call($func, $args) {
-        if (is_callable($this->service($func)))
-            return call_user_func_array($this->service($func), $args);
-        else
-            return $this->service($func);
+        if (is_callable($this->services[$func]))
+            return call_user_func_array($this->services[$func], $args);
+        else {
+            if (is_object($this->services[$func])) {
+                $this->services[$func]->setEngine($this);
+            }
+            return $this->services[$func];
+        }
     }
 
-    public function proceed() {
-        $lvls = array(EL_PRE, EL_REQUEST, EL_RESPONSE);
-        foreach ($lvls as $lvl)
-            echo $this->proceedLevel($lvl);
-    }
-
-    public function proceedLevel($lvl) {
+    /**
+     * Engage engine
+     * @return string
+     */
+    public function engage() {
         $responses = array();
-        if (count($this->apps[$lvl])) 
-            foreach ($this->apps[$lvl] as $classname) {
-                $responses[] = $classname->proceed($this); 
-            } 
+        if ($this->apps) foreach ($this->apps as $classname) {
+            $responses[] = $classname->engage($this); 
+        } 
 
         return implode($responses, '');
     }
 
+    /**
+     * Register app
+     * @param string
+     * @param \Core\EngineDispatcher
+     * @return \Core\Engine
+     */
+    public function register($name, $dispatcher) {
+        $this->apps[$name] = $dispatcher;
+
+        return $this;
+    }
+
+    /**
+     * Get all app dispatchers
+     * @param string
+     * @return array
+     */
     public function getApps($lvl) {
         return $this->apps[$lvl];
     }
 
-    public function register($name, $instance) {
+    /**
+     * Register service
+     * @param string
+     * @param mixed
+     */
+    public function service($name, $instance) {
         $this->services[$name] = $instance;
+        return $this;
     }
 
-    public function service($name) {
-        return $this->services[$name];
-    }
-
-    public function getConfig() {
-        return $this->config;
-    }
-
+    /**
+     * Fatal error handler 
+     */
     public static function fatalErrorHandler($no, $str, $file, $line) {
         if ($no === E_RECOVERABLE_ERROR) {
             throw new \ErrorException($str, $no, 0, $file, $line);
@@ -57,4 +82,5 @@ class Engine {
     }
 }
 
+// get some fatal errors!
 set_error_handler('\Core\Engine::fatalErrorHandler');

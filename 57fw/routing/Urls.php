@@ -5,5 +5,8 @@ namespace Routing;
  * Urls interface for app's Urls
  */
 interface Urls {
-    public function init($e);
+    /*
+     * @param \Core\Engine
+     */
+    public function engage($e);
 }

@@ -1,33 +1,46 @@
 <?php
-define(EL_PRE, 1);
-define(EL_REQUEST, 2);
-define(EL_RESPONSE, 3);
 define(START, microtime(1));
 
 spl_autoload_register(function ($classname) {
     $parts = explode('\\', $classname);
     $class = array_pop($parts);
-    $fwnamespaces = array(
+    $fw_namespaces = array(
         'Core',
         'Http',
         'Orm',
         'Routing',
     );
-    if (array_search($parts[0], $fwnamespaces) !== false)
+    if (array_search($parts[0], $fw_namespaces) !== false)
         $parts = array_merge(['57fw'], $parts);
     $namespace = strtolower(implode('/', $parts));
+
     include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
 
-$e = new \Core\Engine(new Config\Engine());
+class ExampleModel extends \Orm\Model {
+    public $title = 'new \Orm\Field\Varchar(32)';
+    public $text = 'new \Orm\Field\Text';
+}
 
-$e->register('router', (new Routing\Router($e)));
-$e->register('http', (new Http\Http($e)));
-$e->register('man', function ($model) { global $e;
-    return \Orm\Manager::manGetter($e, $model, '\Config\ConnectedManager');
-});
+$e = new \Core\Engine();
+$e
+    ->service('router', (new Routing\Router($e)))
+    ->service('http', (new Http\Http($e)))
+    ->service('man', function ($model) {
+        return \Orm\Manager::manGetter($model, '\Config\ConnectedManager');
+    })
 
-if (!isset($cli)) {
-    $e->proceed();
-    print microtime(1) - START;
+    ->register('notepad', new \Core\AppDispatcher('\App\Notepad'))
+    ->register('router', new \Routing\RouterDispatcher())
+
+    ->router()->register('/(?P<x>\S+)/(?<y>\S+)/', function ($e, $args) {
+        $man = $e->man(new ExampleModel);        
+
+        return 'the show must go on';
+    })
+;
+
+if (!defined('CLI')) {
+    $e->engage();
+    print '<br /><small>' . (microtime(1) - START) . '</small>';
 }

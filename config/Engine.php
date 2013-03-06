@@ -9,8 +9,6 @@ class Engine {
         $el_request = &$apps[EL_REQUEST];
         $el_response = &$apps[EL_RESPONSE];
         /*****/
-        $el_pre[] = new \Core\AppDispatcher('\App\Notepad');
-        $el_response[] = new \Routing\RouterDispatcher();
         /*****/
         return $apps;
     }

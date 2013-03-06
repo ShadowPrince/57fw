@@ -5,5 +5,8 @@ namespace Core;
  * Interface for dispatchers
  */
 interface EngineDispatcher {
-    public function proceed($e);
+    /**
+     * @param \Core\Engine
+     */
+    public function engage($e);
 }

@@ -1,18 +1,29 @@
 #!/usr/bin/env php
 <?php
-$cli = true;
+define('CLI', 1);
+
 include 'index.php';
 
+/**
+ * Prepare database
+ */
 function prepareDatabase($e, $opts, $print_callback, $app=false) {
-    foreach ($e->getApps(EL_PRE) as $instance)
-        if (!$app || get_class($instance) == $app)
+    foreach ($e->getApps(1) as $instance) 
+        if (!$app || strtolower($instance->getName()) == strtolower($app))
             $instance->prepareDatabase($e, $opts, $print_callback);
 }
 
+/**
+ * Get app path
+ */
 function appPath($name) {
     return 'app' . DIRECTORY_SEPARATOR . strtolower($name) . DIRECTORY_SEPARATOR;
 }
 
+/**
+ * Start new app 
+ * @param $name
+ */
 function startapp($name) {
     mkdir(appPath($name) . 'models', 0755, 1);
     $f = fopen(appPath($name) . 'Urls.php', 'w');
@@ -31,6 +42,9 @@ class Urls implements \Routing\Urls {
     fclose($f);
 }
 
+/**
+ * Parse args
+ */
 function parseArguments($argv) {
     array_shift($argv);
     $out = array();
@@ -63,15 +77,23 @@ function parseArguments($argv) {
     return $out;
 }
 
+function dottedPrint ($s) {
+    print '  .. ' . $s . PHP_EOL;
+}
+
 $opts = parseArguments($argv);
 
 print ':: 57fw cli' . PHP_EOL;
 switch (reset($opts)) {
+    case 'modeldb':
+        print ':: Preparing database for model ' . $opts[1] . PHP_EOL;
+        $m = $e->man($opts[1]);
+        $m->prepare($opts, 'dottedPrint');
+        
+    break;
     case 'syncdb': 
         print ':: Preparing databases...' . PHP_EOL;
-        prepareDatabase($e, $opts, function ($s) {
-            print '  .. ' . $s . PHP_EOL;
-        });
+        prepareDatabase($e, $opts, 'dottedPrint', $opts[1]);
         print ':: Done ';
     break;
     case 'startapp':
@@ -80,5 +102,9 @@ switch (reset($opts)) {
         }
         startapp($opts[1]);
 
+    break;
+
+    default:
+        print '!! Choose your destiny: (modeldb, syncdb, startapp)';
     break;
 }

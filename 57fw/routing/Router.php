@@ -1,12 +1,11 @@
 <?php
 namespace Routing;
 
-class Router {
+class Router extends \Core\Service {
     protected $routings = array();
-    protected $e;
 
-    public function __construct($e) {
-        $this->e = $e; 
+    public function __construct() {
+
     }
 
     /**
@@ -14,8 +13,13 @@ class Router {
      * @param string
      * @param mixed 
      */
-    public function register($regex, $instance) {
-        $this->routings[$regex] = $instance;
+    public function register($regex, $instance, $full_regex=false) {
+        $this->routings[$regex] = array(
+            'instance' => $instance, 
+            'full_regex' => $full_regex
+        );
+
+        return $this->e;
     }
 
     /**
@@ -25,13 +29,15 @@ class Router {
      */
     public function find($url) {
         if ($this->routings) foreach ($this->routings as $regex => $ins) {
+            if (!$ins['full_regex']) {
+                $regex = '#^' . $regex . '$#i';
+            }
             if (preg_match($regex, $url, $matches)) {
                 array_shift($matches);
                 return array(
-                   $ins,
-                   (strpos($regex, '?P')),
-                   array_unique(array_reverse($matches)),
-                   array_unique($matches)
+                   $ins['instance'], // instance
+                   (strpos($regex, '?P')), // is there named params
+                   $matches // all params 
                 );
             }
         }
@@ -55,17 +61,22 @@ class Router {
     }
 
     /**
-     * Proceed router for $url
+     * engage router for $url
      * @param string
      * @return mixed
      */
-    public function proceed($url) {
+    public function engage($url) {
         $data = $this->find($url);
         if ($data) {
             if ($data[1])
-                return $this->callInstance($data[0], $data[3], $data[1]);
+                return $this->callInstance($data[0], $data[2], $data[1]);
             else
                 return $this->callInstance($data[0], $data[2], $data[1]);
-        } else return '404';
+        } else {
+            if (array_pop(str_split($url)) != '/')
+                return $this->engage($url . '/');
+            else
+                throw new \Routing\Ex\RouteNotFoundException($url);
+        };
     }
 }
