@@ -15,7 +15,7 @@ class MyQuerySet extends \Orm\QuerySet {
      * Setup required params if not setted
      * @return \Orm\QuerySet
      */
-    public function standartParams() {
+    public function getStandartizedParams() {
         $wh = $this->wh;
         $fields = $this->fields;
         $additional = $this->additional;
@@ -45,6 +45,28 @@ class MyQuerySet extends \Orm\QuerySet {
         );
 
     }
+    
+    /**
+     * Update all query set. $instance = key-value array or instance of model
+     * @param mixed
+     * @return \Orm\QuerySet
+     */
+    public function update($instance) {
+        if ($instance instanceof \Orm\Model) {
+            $kv = $this->manager->dissassembleInstance($instance);
+        } else if (is_array($kv)) {
+            
+        }
+        $params = $this->getStandartizedParams();
+        $this->manager->backend->update(
+            $this->manager,
+            $kv,
+            $params['wh'],
+            $params['additional']
+        ); 
+
+        return $this;
+    }
 
     /**
      * Execute query add fill set
@@ -52,7 +74,7 @@ class MyQuerySet extends \Orm\QuerySet {
      */
     public function execute() {
         if (!$this->executed) {
-            $params = $this->standartParams();
+            $params = $this->getStandartizedParams();
             $this->set = $this->manager->backend->select(
                 $this->manager, 
                 $params['wh'],
@@ -68,7 +90,7 @@ class MyQuerySet extends \Orm\QuerySet {
      * @return int
      */
     public function count() {
-        $params = $this->standartParams();
+        $params = $this->getStandartizedParams();
 
         return $this->manager->backend->count(
             $this->manager,
@@ -89,9 +111,7 @@ class MyQuerySet extends \Orm\QuerySet {
         array_shift($fl); 
         $fl = implode(' ', $fl);
 
-        $this->wh[] =
-            '`' . $col . '` ' . $fl . ' ' . $this->manager->backend->escape($value)
-        ;
+        $this->wh['`' . $col . '` ' . $fl . ' %s'] = array($value);
 
         return $this;
     }
@@ -103,11 +123,14 @@ class MyQuerySet extends \Orm\QuerySet {
      * @return \Orm\QuerySet
      */
     public function order($field, $desc=false) {
-        if ($field instanceof \Orm\Field\Field)
-            $field = $field->getName();
-        
-        $this->additional['order'] = $field . ' ' . ($desc ? 'desc' : '');
+        if ($field == null) {
+            unset($this->additional['order']);
+        } else {
+            if ($field instanceof \Orm\Field\Field)
+                $field = $field->getName();
 
+            $this->additional['order'] = $field . ' ' . ($desc ? 'desc' : '');
+        }
         return $this;
     }
 
@@ -118,7 +141,10 @@ class MyQuerySet extends \Orm\QuerySet {
      * @return \Orm\QuerySet
      */
     public function limit($n, $f=false) {
-        $this->additional['limit'] = $n . ($f ? ' , ' . $f :'');
+        if ($n == null)
+            unset($this->additional['limit']);
+        else
+            $this->additional['limit'] = $n . ($f ? ' , ' . $f :'');
 
         return $this;
     }

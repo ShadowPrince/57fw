@@ -20,12 +20,13 @@ class MySQL implements \Orm\Backend\GeneralBackend {
         )));
     }
 
-    public function update($manager, $kv, $wh) {
+    public function update($manager, $kv, $wh, $additions=array()) {
         $this->executeQuery($this->buildFQuery(
-            'UPDATE %s SET %s WHERE %s',
+            'UPDATE %s SET %s WHERE %s %s',
             $manager->getTable(),
             $kv,
-            $this->whereParamsImplode($wh)
+            $this->whereParamsImplode($wh),
+            $this->additionsParamsImplode($additions)
         ));
     }
 
@@ -35,6 +36,7 @@ class MySQL implements \Orm\Backend\GeneralBackend {
             $manager->getTable(),
             $kv
         ));
+
         return mysql_insert_id();
     }
 
@@ -48,7 +50,7 @@ class MySQL implements \Orm\Backend\GeneralBackend {
     }
 
     public function count($manager, $wh, $additions=array()) {
-        return $this->fetchSingleResult($this->executeQuery($this->buildFQuery(
+        return $this->fetchSingleResult($this->executeQuer($this->buildFQuery(
             'SELECT COUNT(*) FROM %s WHERE %s',
             $manager->getTable(),
             $this->whereParamsImplode($wh),
@@ -257,7 +259,13 @@ class MySQL implements \Orm\Backend\GeneralBackend {
             if ($mixed) foreach ($mixed as &$el)
                 $el = $this->escape($el);
         } else {
+            if (is_string($mixed)) 
+                $quo = 1;
+            else
+                $quo = 0;
             $mixed = mysql_real_escape_string($mixed);
+            if ($quo)
+                $mixed = "'" . $mixed . "'";
         }
         return $mixed;
     }
@@ -295,8 +303,7 @@ class MySQL implements \Orm\Backend\GeneralBackend {
     public function paramsImplode($kv) {
         $params = array();
         foreach ($kv as $k => $v) {
-            $v = $this->escape((string) $v); 
-            $params[] = '`' . $k . '` = \'' . (string) $v . '\''; 
+            $params[] = '`' . $k . '` = ' . $this->escape($v) . ''; 
         }
         return implode(', ', $params);
     }

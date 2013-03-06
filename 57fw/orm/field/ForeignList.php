@@ -19,6 +19,7 @@ class ForeignList extends \Orm\Field\ForeignKey {
         }
 
         $this->value = \Orm\ResultSet::implode($ids);
+        $this->changed = 1;
     }
 
     public function getValue() {

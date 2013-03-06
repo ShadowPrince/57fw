@@ -39,7 +39,8 @@ abstract class Model {
 
     /*
      * Old setter and getter
-     * @TODO: delete this 
+     * Used in QuerySet update
+     */
     public function __call($fn, $args) {
         if (method_exists($this, $fn)) {
             return call_user_func_array(
@@ -47,14 +48,12 @@ abstract class Model {
                 $args
             );
         } else if (count($args) == 1) {
-            return call_user_func_array(
-                array($this->$fn, 'setValue'),
-                $args
-            );
+            $this->getField($fn)->setValue($args[0]);
+            return $this;
         } else if (count($args) == 0) {
-            return $this->$fn->getValue();
+            return $this->getField($fn)->getValue();
         }
-    } */
+    }
 
 
     /**
@@ -71,7 +70,7 @@ abstract class Model {
                     return $var;
                 }
             }
-            throw new \Exception('There is no primary key!');
+            throw new \Orm\Ex\PkeyRequiredException('getPkey() call');
         } 
     }
 
@@ -96,19 +95,26 @@ abstract class Model {
      * createFields by model vars
      */
     protected function createFields() {
+        $pkey = null;
         foreach (get_object_vars($this) as $k => $v) {
             if (is_string($v) && substr($v, 0, 3) == 'new') {
                 $eval = '$this->fields[$k] = ' . $v . ';';
                 eval($eval);
                 $this->fields[$k]->name = $k;
+                if ($this->fields[$k] instanceof \Orm\Field\PrimaryKey)
+                    $pkey = $this->fields[$k];
                 unset($this->$k);
             }
         }
 
-        $ami = get_called_class();
+        $ami = get_class($this);
         if (!$ami::$table)  
             $ami::$table = strtolower(
                 array_pop(explode('\\', get_called_class()))
             );
+
+        if (!$ami::$pkey && $pkey) {
+            $ami::$pkey = $pkey->getName();
+        }
     }
 }

@@ -59,7 +59,7 @@ abstract class Manager extends \Core\Service {
             throw new \Orm\Ex\PKeyRequiredException('get');
         
         $data = $this->backend->select($this, array(
-            "`%s` = '%d'" => array($php_is_dummy::$pkey, $val)
+            "`%s` = %d" => array($php_is_dummy::$pkey, $val)
         ), array('*'));
 
         if (!$data)
@@ -68,6 +68,16 @@ abstract class Manager extends \Core\Service {
             $data = $data[0];
 
         return $this->buildInstance($data);
+    }
+
+    public function dissassembleInstance($instance) {
+        $kv = array();
+        foreach ($instance->getFields() as $field) {
+            if ($field->changed()) {
+                $kv[$field->getName()] = $field->forcedValue();
+            }
+        } 
+        return $kv;
     }
 
     public function buildInstance($data) {
@@ -109,7 +119,7 @@ abstract class Manager extends \Core\Service {
      * Save (insert or update) instance
      * @param \Orm\Model
      */
-    public function save($instance) {
+    public function save($instance, $iknownopk=false) {
         try {
             if (!$instance->{$instance::$pkey})
                 throw new \Exception();
@@ -121,6 +131,18 @@ abstract class Manager extends \Core\Service {
                 )
             );
         } catch (\Exception $e) {}
+        if (!$instance::$pkey) {
+            if (!$iknownopk)
+                throw new \Orm\Ex\OrmException('save() only insert instances with no primary key, not update. If you want to do it, provide second argument of save ($iknownopk). If you wanna update it - use queryset\'s update().');
+        } else {
+            $this->get($instance->{$instance::$pkey});
+            $wh = array(
+                "`%s` = '%d'" => array(
+                    $instance::$pkey,
+                    $instance->{$instance::$pkey}
+                )
+            );
+        }
 
         $fields = $instance->getFields();
         $kv = array();

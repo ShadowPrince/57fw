@@ -2,11 +2,12 @@
 namespace Orm\Field;
 
 abstract class Field {
-    protected $type, $val;
+    protected $type, $val, $default_val, $changed;
     protected $params = array();
 
     public function __construct($params=null) {
         $this->params = $params;
+        $this->default_val = $this->val;
     }
 
     public function param($k) {
@@ -14,6 +15,11 @@ abstract class Field {
             return $this->params[$k];
         else return false;
     }
+    
+    public function changed() {
+        return $this->changed;
+    }
+
     /**
      * @return string
      */
@@ -23,14 +29,26 @@ abstract class Field {
      */
     public function getName() {return $this->name;}
     /**
-     * @return string
+     * @return mixed
      */
+    public function defaultValue() {return $this->default_value;}
+    /**
+     * @return mixed
+     */ 
     public function getValue() {return $this->value;}
+    /**
+     * @return mixed
+     */
+    public function forcedValue() {return $this->value;}
     /**
      * @param mixed 
      * @return \Orm\Field\Field
      */
-    public function setValue($val) {$this->value = $val; return $this;}
+    public function setValue($val) {
+        $this->value = $val; 
+        $this->changed = 1;
+        return $this;
+    }
 
     /**
      * set field value with no validation (useful when setting values from db)

@@ -33,10 +33,27 @@ $e
     ->register('notepad', new \Core\AppDispatcher('\App\Notepad'))
     ->register('router', new \Routing\RouterDispatcher())
 
-    ->router()->register('/(?P<x>\S+)/(?<y>\S+)/', function ($e, $args) {
-        $man = $e->man(new ExampleModel);        
+    ->router()->register('/orm1/', function ($e) {
+        $man = $e->man(new ExampleModel);
+        for ($i = 0; $i < 3; $i++) {
+            $model = new ExampleModel();
+            $model->title = '123';
+            $model->text = '123';
+            $man->save($model, 1);
+        }
 
-        return 'the show must go on';
+        $queryset = $e->man($model)->find()
+            ->limit(2)
+            ->update(
+                (new ExampleModel())
+                ->title('ABCDEF')
+                ->text('ABCEF') 
+        );
+
+        foreach ($queryset->limit(null) as $instance) {
+            var_dump($instance);
+        }
+        
     })
 ;
 

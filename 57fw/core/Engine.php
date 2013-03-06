@@ -20,7 +20,7 @@ class Engine {
         if (is_callable($this->services[$func]))
             return call_user_func_array($this->services[$func], $args);
         else {
-            if (is_object($this->services[$func])) {
+            if ($this->services[$func] instanceof \Core\Service) {
                 $this->services[$func]->setEngine($this);
             }
             return $this->services[$func];

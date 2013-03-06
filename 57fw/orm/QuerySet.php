@@ -28,6 +28,12 @@ abstract class QuerySet implements \Iterator {
      */
     abstract function order($field, $desc);
     /**
+     * Update all query set. $instance = key-value array or instance of model
+     * @param mixed
+     * @return \Orm\QuerySet
+     */
+    abstract function update($instance);
+    /**
      * @return int
      */
     abstract function count();
