@@ -2,6 +2,9 @@
 define(START, microtime(1));
 
 function getPath($classname) {
+}
+
+spl_autoload_register(function ($classname) {
     $parts = explode('\\', $classname);
     $class = array_pop($parts);
     $fw_namespaces = array(
@@ -14,17 +17,8 @@ function getPath($classname) {
         $parts = array_merge(['57fw'], $parts);
     $namespace = strtolower(implode('/', $parts));
 
-    return $namespace . DIRECTORY_SEPARATOR . $class . '.php';
-}
-
-spl_autoload_register(function ($classname) {
-    include_once getPath($classname);
+    include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
-
-class ExampleModel extends \Orm\Model {
-    public $title = 'new \Orm\Field\Varchar(32)';
-    public $text = 'new \Orm\Field\Text';
-}
 
 
 $e = new \Core\Engine();
@@ -41,7 +35,6 @@ $e
         return \Orm\Manager::manGetter($e, $model, '\Config\ConnectedManager');
     })
 
-    ->register('notepad', new \Core\AppDispatcher('\Notepad'))
     ->register('router', new \Routing\RouterDispatcher())
 ;
 
