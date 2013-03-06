@@ -194,7 +194,7 @@ abstract class Manager extends \Core\Service {
      * @param string
      * @return \Orm\Manager
      */
-    public static function manGetter($e, $model, $man) {
+    public static function manGetter($e, $model) {
         if (is_string($model)) {
 
         } else if ($model instanceof \Orm\Model) {
@@ -204,6 +204,8 @@ abstract class Manager extends \Core\Service {
         if (!isset($e->cache['man_' . $model])) {
             if ($model::$manager) {
                 $man = $model::$manager;
+            } else {
+                $man = get_class();
             }
             $e->cache['man_' . $model] = new $man($model, $e->db());
         }

@@ -32,7 +32,7 @@ $e
             'database' => '57fw',
         )))
     ->service('man', function ($model) { global $e;
-        return \Orm\Manager::manGetter($e, $model, '\Config\ConnectedManager');
+        return \Orm\Manager::manGetter($e, $model);
     })
 
     ->register('router', new \Routing\RouterDispatcher())
