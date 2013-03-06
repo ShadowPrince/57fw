@@ -1,11 +1,10 @@
 <?php
 namespace Orm\Backend\MySQL;
 
-class MySQL implements \Orm\Backend\GeneralBackend {
+class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     protected $querySetClass = '\Orm\Backend\MySQL\MyQuerySet';
 
-    public function __construct($e, $connection) {
-        $this->e = $e;
+    public function __construct($connection) {
         mysql_connect($connection['host'], $connection['user'], $connection['password']);
         mysql_select_db($connection['database']);
     }
@@ -42,7 +41,7 @@ class MySQL implements \Orm\Backend\GeneralBackend {
 
     public function delete($manager, $wh, $additions=array()) {
         $this->executeQuery($this->buildFQuery(
-            'DELETE FROM %s WHERE %s',
+            'DELETE FROM %s WHERE %s %s',
             $manager->getTable(),
             $this->whereParamsImplode($wh),
             $this->additionsParamsImplode($additions)

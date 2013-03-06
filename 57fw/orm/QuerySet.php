@@ -34,6 +34,11 @@ abstract class QuerySet implements \Iterator {
      */
     abstract function update($instance);
     /**
+     * Delete entire query set
+     * @return \Orm\QuerySet
+     */
+    abstract function delete();
+    /**
      * @return int
      */
     abstract function count();

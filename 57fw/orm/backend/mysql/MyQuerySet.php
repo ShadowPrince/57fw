@@ -69,6 +69,21 @@ class MyQuerySet extends \Orm\QuerySet {
     }
 
     /**
+     * Delete entire query set
+     * @return \Orm\QuerySet
+     */
+    public function delete() {
+        $params = $this->getStandartizedParams();
+        $this->manager->backend->delete(
+            $this->manager,
+            $params['wh'],
+            $params['additional']
+        ); 
+
+        return $this;
+    }
+
+    /**
      * Execute query add fill set
      * @return \Orm\QuerySet
      */

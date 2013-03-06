@@ -5,9 +5,9 @@ abstract class Manager extends \Core\Service {
     protected $model;
     protected $backend;
 
-    public function __construct($model) {
+    public function __construct($model, $backend) {
         $this->model = $model;
-        $this->createBackend();
+        $this->backend = $backend;
     } 
 
     /**
@@ -176,6 +176,10 @@ abstract class Manager extends \Core\Service {
         return $this->model;
     }
 
+    /**
+     * Get model instance
+     * @return \Orm\Model
+     */
     public function getModelInstance() {
         $cls = $this->getModel();
         if (!isset($this->modelInstance))
@@ -183,25 +187,28 @@ abstract class Manager extends \Core\Service {
         return $this->modelInstance;
     }
 
-    public static function manGetter($model, $man) {
+    /**
+     * Manager getter for engine service
+     * @param \Core\Engine
+     * @param string
+     * @param string
+     * @return \Orm\Manager
+     */
+    public static function manGetter($e, $model, $man) {
         if (is_string($model)) {
 
         } else if ($model instanceof \Orm\Model) {
             $model = get_class($model);
         }
 
-        if (!isset($e->cache['man_' . $model]))
-            $e->cache['man_' . $model] = new $man($model);
+        if (!isset($e->cache['man_' . $model])) {
+            if ($model::$manager) {
+                $man = $model::$manager;
+            }
+            $e->cache['man_' . $model] = new $man($model, $e->db());
+        }
 
         return $e->cache['man_' . $model];
-    }
-
-    /**
-     * Create backend by string class var
-     */
-    protected function createBackend() {
-        $eval = '$this->backend = ' . $this->backend . ';';
-        eval($eval);
     }
 
     protected function unserialize($val) {

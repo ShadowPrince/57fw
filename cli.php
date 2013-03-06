@@ -8,9 +8,12 @@ include 'index.php';
  * Prepare database
  */
 function prepareDatabase($e, $opts, $print_callback, $app=false) {
-    foreach ($e->getApps(1) as $instance) 
+    foreach ($e->getApps() as $instance) {
+        if (!($instance instanceof \Core\AppDispatcher))
+            continue;
         if (!$app || strtolower($instance->getName()) == strtolower($app))
             $instance->prepareDatabase($e, $opts, $print_callback);
+    }
 }
 
 /**

@@ -5,7 +5,7 @@ namespace Orm;
  * Abstract class of model for inheritance
  */
 abstract class Model {
-    public static $table, $pkey, $order;
+    public static $table, $pkey, $order, $manager;
     public $fields = array();
 
     public function __construct() {

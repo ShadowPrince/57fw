@@ -5,7 +5,7 @@ class Engine {
     protected $config;
     protected $apps;
     protected $services;
-    protected $cache;
+    public $cache;
 
     public function __construct() {
     }
@@ -57,8 +57,8 @@ class Engine {
      * @param string
      * @return array
      */
-    public function getApps($lvl) {
-        return $this->apps[$lvl];
+    public function getApps() {
+        return $this->apps;
     }
 
     /**
