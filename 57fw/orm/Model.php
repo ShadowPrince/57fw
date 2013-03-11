@@ -108,10 +108,12 @@ abstract class Model {
         }
 
         $ami = get_class($this);
-        if (!$ami::$table)  
+        if (!$ami::$table) { 
+            $arr = explode('\\', get_class($this));
             $ami::$table = strtolower(
-                array_pop(explode('\\', get_called_class()))
+                array_pop($arr)
             );
+        }
 
         if (!$ami::$pkey && $pkey) {
             $ami::$pkey = $pkey->getName();

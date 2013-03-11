@@ -9,7 +9,7 @@ include 'index.php';
  */
 function prepareDatabase($e, $opts, $print_callback, $app=false) {
     foreach ($e->getApps() as $instance) {
-        if (!($instance instanceof \Core\AppDispatcher))
+        if (!($instance instanceof \Core\ComponentDispatcher))
             continue;
         if (!$app || strtolower($instance->getName()) == strtolower($app))
             $instance->prepareDatabase($e, $opts, $print_callback);
@@ -35,7 +35,7 @@ function startapp($name) {
 namespace %s\%s;
 
 class Urls implements \Routing\Urls {
-    public function init($e) {
+    public function engage($e) {
 
     }
 }',

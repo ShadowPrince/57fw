@@ -4,10 +4,6 @@ namespace Routing;
 class Router extends \Core\Service {
     protected $routings = array();
 
-    public function __construct() {
-
-    }
-
     /**
      * Register callback
      * @param string
@@ -19,7 +15,7 @@ class Router extends \Core\Service {
             'full_regex' => $full_regex
         );
 
-        return $this->e;
+        return $this;
     }
 
     /**
@@ -51,13 +47,15 @@ class Router extends \Core\Service {
      * @return mixed
      */
     public function callInstance($ins, $args, $named) {
+        $fargs = array(
+            new \Http\Request($_GET, $_POST, $_FILES)
+        );
         if ($named)
-            return call_user_func_array($ins, array($this->e, $args));
+            $fargs = array_merge($fargs, array($args));
         else
-            return call_user_func_array(
-                $ins,
-                array_merge(array($this->e), $args)
-            );
+            $fargs = array_merge($fargs, $args);
+
+        return call_user_func_array($ins, $fargs);
     }
 
     /**
@@ -73,10 +71,12 @@ class Router extends \Core\Service {
             else
                 return $this->callInstance($data[0], $data[2], $data[1]);
         } else {
-            if (array_pop(str_split($url)) != '/')
+            $url_arr = str_split($url);
+            if (array_pop($url_arr) != '/' && $this->getConfig('add_trailing_slash'))
                 return $this->engage($url . '/');
             else
                 throw new \Routing\Ex\RouteNotFoundException($url);
         };
     }
+
 }

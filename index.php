@@ -1,12 +1,13 @@
 <?php
 define(START, microtime(1));
 
-function getPath($classname) {
-}
+error_reporting(E_ALL);
 
 spl_autoload_register(function ($classname) {
     $parts = explode('\\', $classname);
     $class = array_pop($parts);
+    if (!$parts)
+        $parts[] = '\\';
     $fw_namespaces = array(
         'Core',
         'Http',
@@ -23,7 +24,9 @@ spl_autoload_register(function ($classname) {
 
 $e = new \Core\Engine();
 $e
-    ->service('router', (new Routing\Router()))
+    ->service('router', (new Routing\Router(array(
+        'add_trailing_slash' => 1  
+    ))))
     ->service('http', (new Http\Http()))
     ->service('db', new \Orm\Backend\MySQL\MySQL(array(
             'user' => 'root',
@@ -31,11 +34,16 @@ $e
             'host' => 'localhost',
             'database' => '57fw',
         )))
-    ->service('man', function ($model) { global $e;
+    ->service('man', function ($model) { 
+        global $e;
         return \Orm\Manager::manGetter($e, $model);
     })
 
+    ->register('uac', new \Core\ComponentDispatcher('\Uac\Uac', array(
+        'secret_token' => '1'
+    )))
     ->register('router', new \Routing\RouterDispatcher())
+
 ;
 
 if (!defined('CLI')) {

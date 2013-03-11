@@ -6,6 +6,7 @@ class MyQuerySet extends \Orm\QuerySet {
     protected $wh = array(); 
     protected $fields = array();
     protected $additional = array();
+    protected $executed = false;
 
     public function __construct($manager) {
         $this->manager = $manager;
@@ -19,25 +20,25 @@ class MyQuerySet extends \Orm\QuerySet {
         $wh = $this->wh;
         $fields = $this->fields;
         $additional = $this->additional;
-
         $model = $this->manager->getModel();
 
-        if (!$this->fields) {
-            if ($model::$pkey)
+        if (!$fields) {
+            if ($model::$pkey) {
                 $fields = array($model::$pkey);
-            else {
+            } else {
                 $this->simple = true;
                 $fields = array('*');
             }
         }
-        if (!$this->wh)
+
+        if (!$wh) {
             $wh = array(1);
-        if (!$this->additional['order'] && $model::$order) {
-            $additional = array(
-                'order' => $model::$order
-            );
         }
 
+        if (!isset($additional['order']) && isset($model::$order)) {
+            $additional['order'] = $model::$order;
+        }
+        
         return array(
             'wh' => $wh,
             'fields' => $fields,
@@ -53,9 +54,9 @@ class MyQuerySet extends \Orm\QuerySet {
      */
     public function update($instance) {
         if ($instance instanceof \Orm\Model) {
-            $kv = $this->manager->dissassembleInstance($instance);
-        } else if (is_array($kv)) {
-            
+            $kv = $this->manager->dissassembleInstance($instance, true);
+        } else {
+            $kv = $instance;
         }
         $params = $this->getStandartizedParams();
         $this->manager->backend->update(
@@ -89,7 +90,9 @@ class MyQuerySet extends \Orm\QuerySet {
      */
     public function execute() {
         if (!$this->executed) {
+            $this->executed = true;
             $params = $this->getStandartizedParams();
+
             $this->set = $this->manager->backend->select(
                 $this->manager, 
                 $params['wh'],
@@ -126,7 +129,7 @@ class MyQuerySet extends \Orm\QuerySet {
         array_shift($fl); 
         $fl = implode(' ', $fl);
 
-        $this->wh['`' . $col . '` ' . $fl . ' %s'] = array($value);
+        $this->wh[] = array('`' . $col . '` ' . $fl . ' %s', $value);
 
         return $this;
     }

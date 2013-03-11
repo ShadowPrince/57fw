@@ -3,11 +3,13 @@ namespace Orm;
 
 abstract class Manager extends \Core\Service {
     protected $model;
-    protected $backend;
+    protected $e;
+    public $backend;
 
-    public function __construct($model, $backend) {
+    public function __construct($e, $model, $backend) {
         $this->model = $model;
         $this->backend = $backend;
+        $this->e = $e;
     } 
 
     /**
@@ -17,34 +19,6 @@ abstract class Manager extends \Core\Service {
      */
     public function find() {
         return $this->backend->getQuerySet($this);
-/*        $php_is_dummy = $this->getModel();
-        $additions = $this->unserialize($additions);
-        if (!isset($additions['order'])) {
-            $additions['order'] = $php_is_dummy::$order;
-        }
-
-        foreach ($kv as $k => &$v) {
-            if (is_array($v)) {
-                foreach ($v as &$vv) {
-                    $vv = $this->value($vv); 
-                }
-            } else $v = $this->value($v);
-        }
-
-        if ($php_is_dummy::$pkey) {
-            return new \Orm\ResultSet(array($this, 'get'),
-                $this->backend->select($this, $kv, array(
-                    $php_is_dummy::$pkey
-                ), $additions)
-            );
-        } else {
-            return new \Orm\ResultSet(array($this, 'buildInstance'),
-                $this->backend->select($this, $kv, array(
-                    '*'
-                ), $additions), true
-            );
-        }
-*/
     }
 
     /**
@@ -57,9 +31,9 @@ abstract class Manager extends \Core\Service {
         $php_is_dummy = $this->getModel();
         if (!$php_is_dummy::$pkey)
             throw new \Orm\Ex\PKeyRequiredException('get');
-        
+         
         $data = $this->backend->select($this, array(
-            "`%s` = %d" => array($php_is_dummy::$pkey, $val)
+            array("`" . $php_is_dummy::$pkey . "` = %s", $val)
         ), array('*'));
 
         if (!$data)
@@ -70,10 +44,10 @@ abstract class Manager extends \Core\Service {
         return $this->buildInstance($data);
     }
 
-    public function dissassembleInstance($instance) {
+    public function dissassembleInstance($instance, $changed=false) {
         $kv = array();
         foreach ($instance->getFields() as $field) {
-            if ($field->changed()) {
+            if ($field->changed() || !$changed) {
                 $kv[$field->getName()] = $field->forcedValue();
             }
         } 
@@ -120,41 +94,24 @@ abstract class Manager extends \Core\Service {
      * @param \Orm\Model
      */
     public function save($instance, $iknownopk=false) {
-        try {
-            if (!$instance->{$instance::$pkey})
-                throw new \Exception();
-            $this->get($instance->{$instance::$pkey});
-            $wh = array(
-                "`%s` = '%d'" => array(
-                    $instance::$pkey,
-                    $instance->{$instance::$pkey}
-                )
-            );
-        } catch (\Exception $e) {}
-        if (!$instance::$pkey) {
+        if ($instance->getPKey()) {
+            if ($instance->getPKey()->getValue()) {
+                $wh = array(
+                    "%s = %s" => array(
+                        $instance::$pkey,
+                        $instance->{$instance::$pkey}
+                    )
+                );
+            }
+        } else {
             if (!$iknownopk)
                 throw new \Orm\Ex\OrmException('save() only insert instances with no primary key, not update. If you want to do it, provide second argument of save ($iknownopk). If you wanna update it - use queryset\'s update().');
-        } else {
-            $this->get($instance->{$instance::$pkey});
-            $wh = array(
-                "`%s` = '%d'" => array(
-                    $instance::$pkey,
-                    $instance->{$instance::$pkey}
-                )
-            );
-        }
-
-        $fields = $instance->getFields();
-        $kv = array();
-        if ($fields) foreach ($fields as $field) {
-            $field->getValue();
-            $kv[$field->getName()] = $this->value($field->getValue());
         }
 
         if (isset($wh)) {
-            $this->backend->update($this, $kv, $wh);
+            $this->backend->update($this, $this->dissassembleInstance($instance), $wh);
         } else {
-            $this->backend->insert($this, $kv);
+            $this->backend->insert($this, $this->dissassembleInstance($instance));
         }
 
     }
@@ -207,7 +164,7 @@ abstract class Manager extends \Core\Service {
             } else {
                 $man = get_class();
             }
-            $e->cache['man_' . $model] = new $man($model, $e->db());
+            $e->cache['man_' . $model] = new $man($e, $model, $e->db());
         }
 
         return $e->cache['man_' . $model];

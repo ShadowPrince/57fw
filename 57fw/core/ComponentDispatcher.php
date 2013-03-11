@@ -1,14 +1,19 @@
 <?php
 namespace Core;
 
-class AppDispatcher implements \Core\EngineDispatcher {
+class ComponentDispatcher extends \Core\EngineDispatcher {
     protected $namespace;
-    protected $urls;
+    protected $component;
     protected $models;
 
-    public function __construct($appNamespace) {
-        $this->namespace = $appNamespace;    
-        $this->urls = $this->namespace . '\\Urls';
+    public function __construct($component, $config=array()) {
+        $this->component = $component;
+
+        $ns = explode('\\', $component);
+        array_pop($ns);
+        $this->namespace = implode('\\', $ns);
+
+        parent::__construct($config);
     }
 
     /**
@@ -30,7 +35,7 @@ class AppDispatcher implements \Core\EngineDispatcher {
      * @param \Core\Engine
      */
     public function engage($e) {
-        (new $this->urls())->engage($e);
+        (new $this->component($this->config))->engage($e);
     }
    
     /**
@@ -38,7 +43,7 @@ class AppDispatcher implements \Core\EngineDispatcher {
      * @return string
      */
     public function getName() {
-        return str_replace('\App\\', '', $this->namespace);
+        return $this->namespace;
     }
 
     /**

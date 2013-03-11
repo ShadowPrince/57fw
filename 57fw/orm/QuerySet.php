@@ -43,6 +43,10 @@ abstract class QuerySet implements \Iterator {
      */
     abstract function count();
 
+    public function filter3($field, $flag, $value) {
+        return $this->filter($field . ' ' . $flag, $value);
+    }
+    
     /**
      * Get length of query set
      * @return int
@@ -90,7 +94,7 @@ abstract class QuerySet implements \Iterator {
     /**
      * Various methods for Iterator
      */
-    public function get($data) {
+    public function getInstance($data) {
         if ($this->simple)
             return $this->manager->buildInstance($data);
         else
@@ -103,13 +107,14 @@ abstract class QuerySet implements \Iterator {
     }
 
     public function current() {
+        $this->execute();
         if ($this->simple) {
             $args = array(current($this->set));
         } else {
             $args = array(current($this->set)['id']);
         }
 
-        return call_user_func_array(array($this, 'get'), $args);
+        return call_user_func_array(array($this, 'getInstance'), $args);
     }
 
     public function key() {

@@ -1,12 +1,9 @@
 <?php
 namespace Core;
 
-/** 
- * Interface for dispatchers
- */
-abstract class EngineDispatcher {
+abstract class Component {
     protected $config; 
-//    protected $e;
+
 
     public function __construct($config=array()) {
         $this->config = $config;
@@ -24,11 +21,7 @@ abstract class EngineDispatcher {
     public function getConfig($k) {
         return $this->config[$k];
     }
-
-/*
-    public function setEngine($e) {
-        $this->e = $e;
-    }
-*/
-
+    /*
+     * @param \Core\Engine
+     */
 }

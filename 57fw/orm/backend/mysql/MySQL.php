@@ -143,7 +143,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
 
         if ($sql) {
             foreach ($sql as $qw) {
-                if ($opts['sql'])
+                if (isset($opts['sql']))
                     $print_callback('  ' . $qw);
                 else
                     $this->executeQuery($qw);
@@ -211,6 +211,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
      * @param string
      */
     protected function executeQuery($qw) {
+        var_dump($qw);
         $res = mysql_query($qw) or die(mysql_error());
         return $res;
     }
@@ -258,6 +259,8 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
             if ($mixed) foreach ($mixed as &$el)
                 $el = $this->escape($el);
         } else {
+            if ($mixed === null)
+                $mixed = 'NULL';
             if (is_string($mixed)) 
                 $quo = 1;
             else
@@ -275,23 +278,24 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
      * @return array
      */
     public function whereParamsImplode($kv) {
-        if ($kv == '1') {
-            return '1';
+        if (is_string($kv)) {
+            return $kv;
         }
         $params = array();
         foreach ($kv as $k => $v) {
             if (is_array($v)) {
+                $str = array_shift($v);
                 $v = $this->escape($v);
                 $params[] = call_user_func_array(
                     'sprintf',
-                    array_merge([$k], $v)
+                    array_merge(array($str), $v)
                 );
             } else {
                 $params[] = (string) $v;
             }
         }        
 
-        return implode(', ', $params);
+        return implode(' AND ', $params);
     }
 
     /**

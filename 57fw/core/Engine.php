@@ -20,9 +20,9 @@ class Engine {
         if (is_callable($this->services[$func]))
             return call_user_func_array($this->services[$func], $args);
         else {
-            if ($this->services[$func] instanceof \Core\Service) {
-                $this->services[$func]->setEngine($this);
-            }
+            // if ($this->services[$func] instanceof \Core\Service) {
+            //     $this->services[$func]->setEngine($this);
+            // }
             return $this->services[$func];
         }
     }
@@ -59,6 +59,10 @@ class Engine {
      */
     public function getApps() {
         return $this->apps;
+    }
+
+    public function app($name) {
+        return $this->apps[$name];
     }
 
     /**
