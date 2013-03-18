@@ -40,7 +40,7 @@ abstract class Manager extends \Core\Service {
             throw new \Orm\Ex\PKeyRequiredException('get');
          
         $data = $this->backend->select($this, array(
-            array("`" . $php_is_dummy::$pkey . "` = %s", $val)
+            array("`" . $php_is_dummy::$pkey . "` = ?", $val)
         ), array('*'));
 
         if (!$data)
@@ -119,7 +119,7 @@ abstract class Manager extends \Core\Service {
             if ($instance->getPKey()->getValue()) {
                 $wh = array(
                     array(
-                        '`' . $instance::$pkey . '` = %s',
+                        '`' . $instance::$pkey . '` = ?',
                         $instance->{$instance::$pkey}
                     )
                 );

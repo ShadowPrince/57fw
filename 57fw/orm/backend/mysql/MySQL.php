@@ -277,9 +277,11 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
      */
     public function buildFQuery($qw) {
         $args = func_get_args();
-        foreach ($args as &$arg)
+        foreach ($args as &$arg) {
+            $arg = str_replace('?', '%s', $arg);
             if (is_array($arg))
                 $arg = $this->paramsImplode($arg);
+        }
         return call_user_func_array('sprintf', $args); 
     }
 
@@ -317,7 +319,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
         $params = array();
         foreach ($kv as $k => $v) {
             if (is_array($v)) {
-                $str = array_shift($v);
+                $str = str_replace('?', '%s', array_shift($v));
                 $v = $this->escape($v);
                 $params[] = call_user_func_array(
                     'sprintf',

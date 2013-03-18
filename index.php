@@ -43,11 +43,12 @@ $e
     ->register('router', (new Routing\Router(array(
         'add_trailing_slash' => 1
     ))))
-    ->register('db', new \Orm\Backend\MySQL\MySQL(array(
+    ->register('db', new \Orm\Backend\PDO\PDO(array(
         'user' => 'root',
         'password' => '1',
         'host' => 'localhost',
         'database' => '57fw',
+        'type' => 'mysql',
         'debug' => true
     )))
     ->register('man', function ($model) { 
@@ -66,8 +67,8 @@ $e
         global $e;
         $res = '';
         if ($req->user) {
-            $res .= 'Logged as ' . $req->user->username . '<br>';
-            $res .= 'Su: ' . $req->user->su . ', email: ' . $req->user->email . '<br>';
+            $res .= 'Logged as ' . $req->user->username . ', ';
+            $res .= 'su: ' . $req->user->su . ', email: ' . $req->user->email . '<br>';
         }
         $res .= 'mainpage';
         return $res;
