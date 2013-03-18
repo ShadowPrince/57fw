@@ -1,7 +1,7 @@
 <?php
 namespace Core;
 
-class ComponentDispatcher extends \Core\EngineDispatcher {
+class ComponentDispatcher extends \Core\AppDispatcher {
     protected $namespace;
     protected $component;
     protected $models;

@@ -16,7 +16,7 @@ spl_autoload_register(function ($classname) {
     );
     if (array_search($parts[0], $fw_namespaces) !== false)
         $parts = array_merge(['57fw'], $parts);
-    $namespace = strtolower(implode('/', $parts));
+    $namespace = strtolower(implode(DIRECTORY_SEPARATOR, $parts));
 
     include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
@@ -24,25 +24,48 @@ spl_autoload_register(function ($classname) {
 
 $e = new \Core\Engine();
 $e
-    ->service('router', (new Routing\Router(array(
-        'add_trailing_slash' => 1  
+
+    ->register('http', (new Http\Http()))
+
+    // modifying request is now available
+    ->register('router', (new Routing\Router(array(
+        'add_trailing_slash' => 1
     ))))
-    ->service('http', (new Http\Http()))
-    ->service('db', new \Orm\Backend\MySQL\MySQL(array(
+    ->register('db', new \Orm\Backend\MySQL\MySQL(array(
             'user' => 'root',
             'password' => '1',
             'host' => 'localhost',
             'database' => '57fw',
+            'debug' => 1
         )))
-    ->service('man', function ($model) { 
+    ->register('man', function ($model) { 
         global $e;
         return \Orm\Manager::manGetter($e, $model);
     })
 
     ->register('uac', new \Core\ComponentDispatcher('\Uac\Uac', array(
-        'secret_token' => '1'
+        'secret_token' => '1',
+        'url_prefix' => '/uac/'
     )))
-    ->register('router', new \Routing\RouterDispatcher())
+    
+    // modify request is now unavailable
+    ->register('router_dispatcher', new \Routing\RouterDispatcher())
+
+    // modifying response is now unavailable
+    ->register('router_dispatcher_response', new \Routing\RouterDispatcher(array(
+        'engage_response' => 1
+    )))
+
+    ->router()->register(null, '/', function ($req) { 
+        global $e;
+        $res = '';
+        if ($req->user) {
+            $res .= 'Logged as ' . $req->user->username . '<br>';
+            $res .= 'Su: ' . $req->user->su . ', email: ' . $req->user->email . '<br>';
+        }
+        $res .= 'mainpage';
+        return $res;
+    })
 
 ;
 

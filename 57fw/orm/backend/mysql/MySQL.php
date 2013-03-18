@@ -4,9 +4,14 @@ namespace Orm\Backend\MySQL;
 class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     protected $querySetClass = '\Orm\Backend\MySQL\MyQuerySet';
 
-    public function __construct($connection) {
-        mysql_connect($connection['host'], $connection['user'], $connection['password']);
-        mysql_select_db($connection['database']);
+    public function __construct($config=array()) {
+        parent::__construct($config);
+        mysql_connect(
+            $this->config('host'),
+            $this->config('user'),
+            $this->config('password')
+        );
+        mysql_select_db($this->config('database'));
     }
 
     public function select($manager, $wh, $fields, $additions=array()) {
@@ -49,7 +54,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     }
 
     public function count($manager, $wh, $additions=array()) {
-        return $this->fetchSingleResult($this->executeQuer($this->buildFQuery(
+        return $this->fetchSingleResult($this->executeQuery($this->buildFQuery(
             'SELECT COUNT(*) FROM %s WHERE %s',
             $manager->getTable(),
             $this->whereParamsImplode($wh),
@@ -72,7 +77,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
             $manager->getTable() . '_tmp',
             implode(', ', $prep_fields)
         )); 
-        mysql_query($x) or die(mysql_error());
+        $this->executeQuery($x);
 
         if ($this->tableExists($manager->getTable())) {
             $cols_old = $this->getColumns($manager->getTable());
@@ -176,7 +181,20 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
      * @return string
      */
     protected function provideField($field) {
-        return $field->getName() . ' ' . strtoupper($field->getType()); 
+        $params = array($field->getName() . ' ' . strtoupper($field->getType()));
+        if ($field->param('null') != true)
+            $params[] = 'NOT NULL';
+
+        if ($field->param('uniq'))
+            $params[] = 'UNIQUE';
+
+        if ($field instanceof \Orm\Field\PrimaryKey) {
+            $params[] = 'PRIMARY KEY';
+            if ($field->param('auto_increment') != false)
+                $params[] = 'AUTO_INCREMENT';
+        }
+
+        return implode(' ', $params);
     }
 
     /**
@@ -211,9 +229,15 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
      * @param string
      */
     protected function executeQuery($qw) {
-        var_dump($qw);
-        $res = mysql_query($qw) or die(mysql_error());
+        $res = mysql_query($qw) or ($this->executeError($qw));
         return $res;
+    }
+
+    protected function executeError($qw) {
+        if ($this->config('debug'))
+            throw new \Orm\Ex\ExecuteException(mysql_error(), $qw);
+        else
+            throw new \Orm\Ex\ExecuteException('(debug disabled)', '(debug disabled)');
     }
 
     /**
@@ -259,15 +283,14 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
             if ($mixed) foreach ($mixed as &$el)
                 $el = $this->escape($el);
         } else {
-            if ($mixed === null)
+            if ($mixed === null) {
                 $mixed = 'NULL';
-            if (is_string($mixed)) 
-                $quo = 1;
-            else
-                $quo = 0;
-            $mixed = mysql_real_escape_string($mixed);
-            if ($quo)
+            } else if (is_string($mixed)) {
+                $mixed = mysql_real_escape_string($mixed);
                 $mixed = "'" . $mixed . "'";
+            } else if (is_bool($mixed))  {
+                $mixed = $mixed ? 'TRUE' : 'FALSE';
+            }
         }
         return $mixed;
     }
@@ -295,7 +318,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
             }
         }        
 
-        return implode(' AND ', $params);
+        return implode(' ', $params);
     }
 
     /**

@@ -20,7 +20,8 @@ function prepareDatabase($e, $opts, $print_callback, $app=false) {
  * Get app path
  */
 function appPath($name) {
-    return 'app' . DIRECTORY_SEPARATOR . strtolower($name) . DIRECTORY_SEPARATOR;
+    # return 'app' . DIRECTORY_SEPARATOR .
+    return strtolower($name) . DIRECTORY_SEPARATOR;
 }
 
 /**
@@ -96,11 +97,11 @@ switch (reset($opts)) {
     break;
     case 'syncdb': 
         print ':: Preparing databases...' . PHP_EOL;
-        prepareDatabase($e, $opts, 'dottedPrint', $opts[1]);
+        prepareDatabase($e, $opts, 'dottedPrint', isset($opts[1]) ? $opts[1] : false);
         print ':: Done ';
     break;
     case 'startapp':
-        if (!$opts[1]) {
+        if (!isset($opts[1])) {
             $opts[1] = readline('  .. Enter name: ');
         }
         startapp($opts[1]);

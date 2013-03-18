@@ -7,10 +7,11 @@ class User extends \Orm\Model {
     public static $table = 'user';
 
     public $id = 'new \Orm\Field\IntPKey()';
-    public $username = 'new \Orm\Field\Varchar(32)';
+    public $su = 'new \Orm\Field\Boolean(array("value" => false))';
+    public $username = 'new \Orm\Field\Varchar(32, array("uniq"=>1))';
     public $password = 'new \Orm\Field\Varchar(32)';
-    public $email = 'new \Orm\Field\Varchar(128)';
+    public $email = 'new \Orm\Field\Varchar(128, array("uniq"=>1))';
 
-    public $auth_token = 'new \Orm\Field\Varchar(32)';
-    public $auth_token_expire = 'new \Orm\Field\DateTime()';
+    public $auth_token = 'new \Orm\Field\Varchar(32, array("null" => 1))';
+    public $auth_token_expire = 'new \Orm\Field\DateTime(array("null" => 1))';
 }

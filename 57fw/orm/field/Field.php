@@ -3,20 +3,26 @@ namespace Orm\Field;
 
 abstract class Field {
     protected $type, $val, $default_val, $changed;
+    protected $value = null;
     protected $params = array();
 
     public function __construct($params=null) {
-        $this->params = $params;
+        if ($params) 
+            $this->params = $this->params + $params;
+
+        if ($this->param('value') !== null)
+            $this->setValue($this->param('value'));
+
         $this->default_val = $this->val;
     }
 
     public function param($k) {
         if (isset($this->params[$k]))
             return $this->params[$k];
-        else return false;
+        else return null;
     }
     
-    public function changed() {
+    public function isChanged() {
         return $this->changed;
     }
 

@@ -3,7 +3,6 @@ namespace Orm\Field;
 
 class ForeignKey extends KeyField {
     protected $type = 'int';
-    protected $value = 0;
     protected $model;
 
     public function __construct($model) {

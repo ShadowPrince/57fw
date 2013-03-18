@@ -1,7 +1,10 @@
 <?php
 namespace Core;
 
-abstract class Component extends \Core\ConfiguredInstance {
+/** 
+ * Interface for dispatchers
+ */
+abstract class AppDispatcher extends \Core\ConfiguredInstance {
     /**
      * @param \Core\Engine
      */

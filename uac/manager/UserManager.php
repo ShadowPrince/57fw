@@ -1,6 +1,9 @@
 <?php
 namespace Uac\Manager;
 
+/**
+ * @TODO: raise exceptions
+ */
 class UserManager extends \Orm\Manager {
     /**
      *  Create user with username, password, email
@@ -10,10 +13,18 @@ class UserManager extends \Orm\Manager {
      *  @return \Auth\Entity\User
      */
     public function credentialsCreate($username, $raw_password, $email) {
+        if ($this->find()
+            ->filter('username =', $username)
+            ->filter('email =', $email, 'or')
+            ->count()
+        ) throw new \Uac\Ex\UserExistException($username, $email);
+            
         $user = new \Uac\Model\User();
         $user->username = $username;
         $user->password = $this->encryptPassword($raw_password);
         $user->email = $email;
+
+        $this->save($user);
         return $user;
     }
 
@@ -30,12 +41,24 @@ class UserManager extends \Orm\Manager {
             ->filter('password =', $this->encryptPassword($password))
             ->current();
 
+        if ($user) {
+            $user->auth_token = $this->generateToken($user);
+            $user->auth_token_expire = (new \DateTime())->add(new \DateInterval('P14D'));
+            $this->save($user);
 
-        $user->auth_token = $this->generateToken($user);
-        $user->auth_token_expire = (new \DateTime())->add(new \DateInterval('P14D'));
-        $this->save($user);
+            return $user;
+        } else {
+            return null;
+        }
+    }
 
-        return $user;
+    public function login($user, $res) {
+        $res->setCookie(
+            'uac_token',
+            $user->auth_token,
+            time() + 72000,
+            '/'
+        ); 
     }
 
     /**
@@ -53,13 +76,18 @@ class UserManager extends \Orm\Manager {
      * @throw \sfException
      * @return \Auth\Entity\User
      */
-    public function cookieLogin($auth_token) {
+    public function authTokenLogin($auth_token) {
         $user = $this->find()
             ->filter('auth_token =', $auth_token)
             ->current();
 
-        $user->auth_token = (new \DateTime())->add(new \DateInterval('P14D'));
-        return $user;
+        if ($user) {
+            $user->auth_token_expire = (new \DateTime())->add(new \DateInterval('P14D'));
+            $this->save($user);
+            return $user;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -76,7 +104,7 @@ class UserManager extends \Orm\Manager {
      * @return string
      */
     private function generateToken($user) {
-        $stoken = $this->e->app('uac')->getConfig('secret_token');
+        $stoken = $this->e->uac()->config('secret_token');
         return md5(
             $stoken . '/' .
             $user->username . '/' . 

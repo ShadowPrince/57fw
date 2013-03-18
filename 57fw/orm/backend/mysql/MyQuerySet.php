@@ -123,17 +123,25 @@ class MyQuerySet extends \Orm\QuerySet {
      * @param mixed
      * @reurn \Orm\QuerySet
      */
-    public function filter($col_fl, $value) {
+    public function filter($col_fl, $value, $op='and') {
         $col = explode(' ', $col_fl)[0];
         $fl = explode(' ', $col_fl);
         array_shift($fl); 
         $fl = implode(' ', $fl);
 
-        $this->wh[] = array('`' . $col . '` ' . $fl . ' %s', $value);
+        $str = '`' . $col . '` ' . $fl . ' %s';
+        if ($this->wh) {
+            if ($op == 'and') 
+                $str = 'AND ' . $str;
+            else if ($op == 'or') 
+                $str = 'OR ' . $str;
+        }
+        $this->wh[] = array($str, $this->value($value));
 
         return $this;
     }
     
+
     /**
      * Set queryset order
      * @param mixed
@@ -167,4 +175,21 @@ class MyQuerySet extends \Orm\QuerySet {
         return $this;
     }
 
+    /**
+     * Get string value of various objects
+     * @param mixed
+     * @return string
+     */
+    protected function value($instance) {
+        if ($instance instanceof \Orm\Model) 
+            return $instance->{$instance::$pkey};
+        if ($instance instanceof \Orm\ResultSet) 
+            return \Orm\ResultSet::implode($instance);
+        if ($instance instanceof \DateTime)
+            return $instance->format(\Orm\Field\DateTime::$format);
+        if (is_bool($instance)) 
+            return (string) $instance;
+
+        return $instance;
+    }
 }

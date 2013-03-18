@@ -97,8 +97,12 @@ abstract class QuerySet implements \Iterator {
     public function getInstance($data) {
         if ($this->simple)
             return $this->manager->buildInstance($data);
-        else
-            return $this->manager->get($data);
+        else {
+            if ($data == 0)
+                return null;
+            else
+                return $this->manager->get($data);
+        }
     }
 
     public function rewind() {

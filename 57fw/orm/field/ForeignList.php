@@ -3,7 +3,6 @@ namespace Orm\Field;
 
 class ForeignList extends \Orm\Field\ForeignKey {
     protected $type = 'text';
-    protected $value = '';
 
     public function setValue($list) {
         $this->list = $list;

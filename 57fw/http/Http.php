@@ -2,12 +2,22 @@
 namespace Http;
 
 class Http extends \Core\Service {
+    protected $server; 
+
+    public function __construct() {
+        $this->server = $_SERVER;
+    }
+
     public function getFullURL() {
-        return $_SERVER['SERVER_NAME'] . $_SERVER['REQUEST_URI'];
+        return $this->server['SERVER_NAME'] . $this->server['REQUEST_URI'];
     }
 
     public function getRequestPath() {
-        if (isset($_SERVER['PATH_INFO']))
-            return $_SERVER['PATH_INFO'];
+        if (isset($this->server['PATH_INFO']))
+            return $this->server['PATH_INFO'];
+    }
+
+    public function getDomain() {
+        return $this->server['SERVER_NAME'];
     }
 }

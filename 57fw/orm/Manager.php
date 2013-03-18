@@ -47,7 +47,7 @@ abstract class Manager extends \Core\Service {
     public function dissassembleInstance($instance, $changed=false) {
         $kv = array();
         foreach ($instance->getFields() as $field) {
-            if ($field->changed() || !$changed) {
+            if ($field->isChanged() || !$changed) {
                 $kv[$field->getName()] = $field->forcedValue();
             }
         } 
@@ -97,8 +97,8 @@ abstract class Manager extends \Core\Service {
         if ($instance->getPKey()) {
             if ($instance->getPKey()->getValue()) {
                 $wh = array(
-                    "%s = %s" => array(
-                        $instance::$pkey,
+                    array(
+                        '`' . $instance::$pkey . '` = %s',
                         $instance->{$instance::$pkey}
                     )
                 );
@@ -181,21 +181,4 @@ abstract class Manager extends \Core\Service {
         return $arr;
     }
 
-    /**
-     * Get string value of various objects
-     * @param mixed
-     * @return string
-     */
-    protected function value($instance) {
-        if ($instance instanceof \Orm\Model) {
-            return $instance->{$instance::$pkey};
-        }
-        if ($instance instanceof \Orm\ResultSet) {
-            return \Orm\ResultSet::implode($instance);
-        }
-        if ($instance instanceof \DateTime) {
-            return $instance->format(\Orm\Field\DateTime::$format);
-        }
-        return $instance;
-    }
 }

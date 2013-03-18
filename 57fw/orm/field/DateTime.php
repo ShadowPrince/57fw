@@ -3,7 +3,6 @@ namespace Orm\Field;
 
 class DateTime extends Field {
     protected $type = 'timestamp';
-    protected $value = '';
     public static $format = 'Y-m-d H:i:s';
 
     public function getValue() {

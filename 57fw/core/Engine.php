@@ -17,13 +17,13 @@ class Engine {
      * @return mixed
      */
     public function __call($func, $args) {
-        if (is_callable($this->services[$func]))
-            return call_user_func_array($this->services[$func], $args);
-        else {
-            // if ($this->services[$func] instanceof \Core\Service) {
-            //     $this->services[$func]->setEngine($this);
-            // }
-            return $this->services[$func];
+        if (is_callable($this->apps[$func])) {
+            return call_user_func_array($this->apps[$func], $args);
+        } else {
+            if ($this->services[$func] instanceof \Core\Service) {
+                 $this->services[$func]->setEngine($this);
+            }
+            return $this->apps[$func];
         }
     }
 
@@ -33,8 +33,13 @@ class Engine {
      */
     public function engage() {
         $responses = array();
-        if ($this->apps) foreach ($this->apps as $classname) {
-            $responses[] = $classname->engage($this); 
+        if ($this->apps) foreach ($this->apps as $name => $instance) {
+            //if (is_callable($instance))
+            //    $responses[] = call_user_func_array($instance, array($this));
+            //else 
+            if ($instance instanceof \Core\AppDispatcher) {
+                $responses[] = $instance->engage($this); 
+            }
         } 
 
         return implode($responses, '');
@@ -43,7 +48,7 @@ class Engine {
     /**
      * Register app
      * @param string
-     * @param \Core\EngineDispatcher
+     * @param \Core\AppDispatcher
      * @return \Core\Engine
      */
     public function register($name, $dispatcher) {
@@ -59,10 +64,6 @@ class Engine {
      */
     public function getApps() {
         return $this->apps;
-    }
-
-    public function app($name) {
-        return $this->apps[$name];
     }
 
     /**

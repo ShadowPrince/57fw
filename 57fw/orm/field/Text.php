@@ -3,7 +3,6 @@ namespace Orm\Field;
 
 class Text extends Field {
     protected $type = 'text';
-    protected $value = '';
 
     public function setValue($val) {
         try {
