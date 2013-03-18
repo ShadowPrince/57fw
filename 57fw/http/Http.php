@@ -5,49 +5,52 @@ namespace Http;
  * Service for HTTP workflow
  */
 class Http extends \Core\Service {
-    protected $server; 
+    protected $response, $request;
 
     public function __construct() {
-        $this->server = $_SERVER;
+        $this->request = new \Http\Request(
+            $_SERVER,
+            $_GET,
+            $_POST,
+            $_FILES,
+            $_COOKIE
+        );
+    }
+
+    /**
+     * Get request
+     */
+    public function getRequest() {
+        return $this->request;
+    }
+
+    /**
+     * Get response
+     */
+    public function getResponse() {
+        return $this->response;
+    }
+
+    public function setResponse($res) {
+        $this->response = $res;
+
+        return $this;
     }
 
     /**
      * @return string
      */
-    public function getFullURL() {
-        return $this->server['SERVER_NAME'] . $this->server['REQUEST_URI'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getRequestPath() {
-        if (isset($this->server['PATH_INFO']))
-            return $this->server['PATH_INFO'];
-    }
-
-    /**
-     * @return string
-     */
-    public function getDomain() {
-        return $this->server['SERVER_NAME'];
-    }
-
-    /**
-     * @param \Http\Response
-     * @return string
-     */
-    public function engageResponse($response) {
-        if ($response->getCookies())
-            foreach ($response->getCookies() as $args) {
+    public function engageResponse() {
+        if ($this->getResponse()->getCookies())
+            foreach ($this->getResponse()->getCookies() as $args) {
                 call_user_func_array('setcookie', $args);
             }
 
-        if ($response->getHeaders())
-            foreach ($response->getHeaders() as $header) {
+        if ($this->getResponse()->getHeaders())
+            foreach ($this->getResponse()->getHeaders() as $header) {
                 header($header);
             }
 
-        return $response->getBody();
+        return $this->getResponse()->getBody();
     }
 }

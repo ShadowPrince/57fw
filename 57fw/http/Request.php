@@ -10,12 +10,14 @@ class Request {
      * @param array
      * @param array
      * @param array
+     * @param array
      */
-    public function __construct($get=array(), $post=array(), $files=array(), $cookies=array()) {
+    public function __construct($server=array(), $get=array(), $post=array(), $files=array(), $cookies=array()) {
         $this->get = $get;
         $this->post = $post;
         $this->files = $files;
         $this->cookies = $cookies;
+        $this->server = $server;
     }
 
     /**
@@ -50,4 +52,27 @@ class Request {
         else if (isset($this->cookies[$k]))
             return $this->cookies[$k];
     }
+
+    /**
+     * @return string
+     */
+    public function getFullURL() {
+        return $this->server['SERVER_NAME'] . $this->server['REQUEST_URI'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getRequestPath() {
+        if (isset($this->server['PATH_INFO']))
+            return $this->server['PATH_INFO'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getDomain() {
+        return $this->server['SERVER_NAME'];
+    }
+
 }

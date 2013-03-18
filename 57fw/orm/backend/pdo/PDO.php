@@ -1,16 +1,13 @@
 <?php
 namespace Orm\Backend\PDO;
 
-class PDO implements \Orm\Backend\GeneralBackend {
+class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
     public $querySetClass = '\Orm\Backend\PDO\PDOQuerySet';
     protected $dbh;
     
     public function __construct($config) {
-        $this->dbh = new \PDO(
-            sprintf(
-                '%s:host=%s;dbname=%s',
-                $config['type'], $config['host'], $config['database']
-            ), $config['user'], $config['password']);
+        parent::__construct($config);
+        $this->dbh = new \PDO($config['uri'], $config['user'], $config['password']);
         $this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
     }
 

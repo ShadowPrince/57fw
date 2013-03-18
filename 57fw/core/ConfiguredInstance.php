@@ -23,4 +23,8 @@ class ConfiguredInstance {
         if (isset($this->config[$k]))
             return $this->config[$k];
     }
+
+    public function setConfig($k, $v) {
+        $this->config[$k] = $v;
+    }
 }

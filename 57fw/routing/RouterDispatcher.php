@@ -7,9 +7,14 @@ namespace Routing;
 class RouterDispatcher extends \Core\AppDispatcher {
     public function engage($e) {
         if ($this->config('engage_response'))
-            return $e->http()->engageResponse($e->router()->getResponse());
+            return $e->http->engageResponse();
         else {
-            return $e->router()->engage($e->http()->getRequestPath());
+            $e->http->setResponse(
+                $e->router->engage(
+                    $e->http->getRequest(),
+                    $e->http->getRequest()->getRequestPath()
+                )
+            );
         }
     }
 }

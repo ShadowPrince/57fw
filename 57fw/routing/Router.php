@@ -11,27 +11,6 @@ class Router extends \Core\Service {
 
     public function __construct() {
         call_user_func_array('parent::__construct', func_get_args());
-
-        $this->request = new \Http\Request(
-            $_GET,
-            $_POST,
-            $_FILES,
-            $_COOKIE
-        );
-    }
-
-    /**
-     * Get request
-     */
-    public function getRequest() {
-        return $this->request;
-    }
-
-    /**
-     * Get response
-     */
-    public function getResponse() {
-        return $this->response;
     }
 
     /**
@@ -63,7 +42,7 @@ class Router extends \Core\Service {
                 $regex = $ins['url_prefix'] . $regex;
             }
             if (!$ins['full_regex']) {
-                $regex = '#^' . $regex . '$#i';
+                $regex = '#^' . $regex . '$#';
             }
             if (preg_match($regex, $url, $matches)) {
                 array_shift($matches);
@@ -83,9 +62,9 @@ class Router extends \Core\Service {
      * @param array
      * @return mixed
      */
-    public function callInstance($ins, $args, $named) {
+    public function callInstance($req, $ins, $args, $named) {
         $fargs = array(
-            $this->request
+            $req
         );
         if ($named)
             $fargs = array_merge($fargs, array($args));
@@ -100,14 +79,14 @@ class Router extends \Core\Service {
      * @param string
      * @return mixed
      */
-    public function engage($url) {
+    public function engage($req, $url) {
         $data = $this->find($url);
         if ($data) {
-            $response = $this->callInstance($data[0], $data[2], $data[1]);
+            $response = $this->callInstance($req, $data[0], $data[2], $data[1]);
             if (!($response instanceof \Http\Response)) {
-                $this->response = new \Http\Response($response);
+                return new \Http\Response($response);
             } else {
-                $this->response = $response;
+                return $response;
             }
         } else {
             $url_arr = str_split($url);
@@ -116,24 +95,6 @@ class Router extends \Core\Service {
             else
                 throw new \Routing\Ex\RouteNotFoundException($url);
         };
-    }
-
-    /**
-     * Enage response to engine
-     * @return string
-     */
-    public function engageResponse() {
-        if ($this->response->getCookies())
-            foreach ($this->response->getCookies() as $args) {
-                call_user_func_array('setcookie', $args);
-            }
-
-        if ($this->response->getHeaders())
-            foreach ($this->response->getHeaders() as $header) {
-                header($header);
-            }
-
-        return $this->response->getBody();
     }
 
 }

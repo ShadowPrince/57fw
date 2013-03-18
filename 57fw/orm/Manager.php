@@ -185,7 +185,7 @@ abstract class Manager extends \Core\Service {
             } else {
                 $man = get_class();
             }
-            $e->cache['man_' . $model] = new $man($e, $model, $e->db());
+            $e->cache['man_' . $model] = new $man($e, $model, $e->db);
         }
 
         return $e->cache['man_' . $model];

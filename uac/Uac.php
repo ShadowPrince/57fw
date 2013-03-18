@@ -5,16 +5,16 @@ class Uac extends \Core\Component {
     public function engage($e) {
         $this->e = $e;
 
-        $e->router()->register($this, 'login/', array($this, 'login'));
-        $e->router()->register($this, 'logout/', array($this, 'logout'));
-        $e->router()->register($this, 'register/', array($this, 'register'));
+        $e->router->register($this, 'login/', array($this, 'login'));
+        $e->router->register($this, 'logout/', array($this, 'logout'));
+        $e->router->register($this, 'register/', array($this, 'register'));
 
         $this->cookieLogin();
     }
 
     protected function cookieLogin() {
         $man = $this->e->man('Uac\Model\User');
-        $request = $this->e->router()->getRequest();
+        $request = $this->e->http->getRequest();
 
         if ($request->cookie('uac_token')) {
             $user = $man->authTokenLogin($request->cookie('uac_token'));

@@ -104,7 +104,7 @@ class UserManager extends \Orm\Manager {
      * @return string
      */
     private function generateToken($user) {
-        $stoken = $this->e->uac()->config('secret_token');
+        $stoken = $this->e->uac->config('secret_token');
         return md5(
             $stoken . '/' .
             $user->username . '/' . 

@@ -4,11 +4,16 @@ namespace Core;
 /**
  * Main engine class
  */
-class Engine {
+class Engine extends \Core\ConfiguredInstance {
     protected $config;
     protected $apps;
     protected $services;
     public $cache;
+
+    public function __get($name) {
+        if (isset($this->apps[$name]))
+            return $this->apps[$name];
+    }
 
     /**
      * Magick method for services
@@ -19,12 +24,7 @@ class Engine {
     public function __call($func, $args) {
         if (is_callable($this->apps[$func])) {
             return call_user_func_array($this->apps[$func], $args);
-        } else {
-            if ($this->services[$func] instanceof \Core\Service) {
-                 $this->services[$func]->setEngine($this);
-            }
-            return $this->apps[$func];
-        }
+        } 
     }
 
     /**

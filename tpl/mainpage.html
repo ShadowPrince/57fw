@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    {% if req.user %}
+        Hello, {{ req.user.username }}!
+        <br />
+        Email: {{ req.user.email }}, 
+        {% if req.user.su %}
+            superuser.
+        {% else %}
+            user. 
+        {% endif %}
+    {% else %}
+        Hello, stranger!
+    {% endif %}
+</body>
+</html>
