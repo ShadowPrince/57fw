@@ -2,7 +2,7 @@
 namespace Orm;
 
 /**
- * Abstract class of model for inheritance
+ * Class for models
  */
 abstract class Model {
     public static $table, $pkey, $order, $manager;
@@ -58,20 +58,14 @@ abstract class Model {
 
     /**
      * Get primary key field of model
-     * @throws \Exception
+     * @throws \Orm\Ex\PKeyRequiredException
      * @return \Orm\Field\PrimaryKey
      */
     public function getPKey() {
-        if ($this->fields['id'] instanceof \Orm\Field\PrimaryKey) {
-            return $this->fields['id'];
-        } else {
-            if ($this->fields) foreach ($this->fields as $k => $var) {
-                if ($var instanceof \Orm\Field\PrimaryKey) {
-                    return $var;
-                }
-            }
-            throw new \Orm\Ex\PkeyRequiredException('getPkey() call');
-        } 
+        if (isset($this::$pkey))
+            return $this->getField($this::$pkey);
+        else
+            throw new \Orm\Ex\PKeyRequiredException('getPKey() call');
     }
 
     /**

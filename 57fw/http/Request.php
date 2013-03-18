@@ -1,7 +1,16 @@
 <?php
 namespace Http;
 
+/**
+ * HTTP request class
+ */
 class Request {
+    /**
+     * @param array
+     * @param array
+     * @param array
+     * @param array
+     */
     public function __construct($get, $post, $files, $cookies) {
         $this->get = $get;
         $this->post = $post;
@@ -9,6 +18,10 @@ class Request {
         $this->cookies = $cookies;
     }
 
+    /**
+     * @param mixed
+     * @return mixed
+     */
     public function post($k=false) {
         if (!$k)
             return $this->post;
@@ -16,6 +29,10 @@ class Request {
             return $this->post[$k];
     }
 
+    /**
+     * @param mixed
+     * @return mixed
+     */
     public function get($k=false) {
         if (!$k)
             return $this->get;
@@ -23,10 +40,14 @@ class Request {
             return $this->get[$k];
     }
 
-    public function cookie($k) {
-        if (isset($this->cookies[$k]))
+    /**
+     * @param mixed
+     * @return mixed
+     */
+    public function cookie($k=false) {
+        if (!$k)
+            return $this->cookies;
+        else if (isset($this->cookies[$k]))
             return $this->cookies[$k];
-        else
-            return null;
     }
 }

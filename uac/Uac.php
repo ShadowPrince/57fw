@@ -4,11 +4,12 @@ namespace Uac;
 class Uac extends \Core\Component {
     public function engage($e) {
         $this->e = $e;
-        $this->cookieLogin();
-         
+
         $e->router()->register($this, 'login/', array($this, 'login'));
         $e->router()->register($this, 'logout/', array($this, 'logout'));
         $e->router()->register($this, 'register/', array($this, 'register'));
+
+        $this->cookieLogin();
     }
 
     protected function cookieLogin() {
@@ -28,7 +29,6 @@ class Uac extends \Core\Component {
             $req->get('e')
         );
         $login_res = $this->login($req);
-        var_dump($login_res);
         if ($login_res instanceof \Http\Response)
             return $login_res->setBody('registered');
         else 

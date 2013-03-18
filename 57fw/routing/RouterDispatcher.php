@@ -1,6 +1,9 @@
 <?php
 namespace Routing;
 
+/**
+ * Class for router engaging
+ */
 class RouterDispatcher extends \Core\AppDispatcher {
     public function engage($e) {
         if ($this->config('engage_response'))

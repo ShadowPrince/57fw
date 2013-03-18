@@ -1,6 +1,9 @@
 <?php
 namespace Orm\Backend;
 
+/**
+ * Interface for general backend
+ */
 interface GeneralBackend {
     /**
      * Find rows where - $wh, with $manager

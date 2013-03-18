@@ -1,14 +1,14 @@
 <?php
 namespace Core;
 
+/**
+ * Main engine class
+ */
 class Engine {
     protected $config;
     protected $apps;
     protected $services;
     public $cache;
-
-    public function __construct() {
-    }
 
     /**
      * Magick method for services
@@ -34,9 +34,6 @@ class Engine {
     public function engage() {
         $responses = array();
         if ($this->apps) foreach ($this->apps as $name => $instance) {
-            //if (is_callable($instance))
-            //    $responses[] = call_user_func_array($instance, array($this));
-            //else 
             if ($instance instanceof \Core\AppDispatcher) {
                 $responses[] = $instance->engage($this); 
             }
@@ -58,22 +55,12 @@ class Engine {
     }
 
     /**
-     * Get all app dispatchers
+     * Get all apps
      * @param string
      * @return array
      */
     public function getApps() {
         return $this->apps;
-    }
-
-    /**
-     * Register service
-     * @param string
-     * @param mixed
-     */
-    public function service($name, $instance) {
-        $this->services[$name] = $instance;
-        return $this;
     }
 
     /**

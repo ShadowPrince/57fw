@@ -4,6 +4,9 @@ namespace Orm\Backend\MySQL;
 class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     protected $querySetClass = '\Orm\Backend\MySQL\MyQuerySet';
 
+    /**
+     * @param mixed
+     */
     public function __construct($config=array()) {
         parent::__construct($config);
         mysql_connect(
@@ -198,6 +201,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     }
 
     /**
+     * Get columns from $table
      * @param string
      * @return array
      */
@@ -226,6 +230,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     }
 
     /**
+     * Execute query
      * @param string
      */
     protected function executeQuery($qw) {
@@ -233,6 +238,11 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
         return $res;
     }
 
+    /**
+     * Handle query execution error
+     * @param string
+     * @throw \Orm\Ex\ExecuteException
+     */
     protected function executeError($qw) {
         if ($this->config('debug'))
             throw new \Orm\Ex\ExecuteException(mysql_error(), $qw);
@@ -274,7 +284,7 @@ class MySQL extends \Core\Service implements \Orm\Backend\GeneralBackend {
     }
 
     /**
-     * Escape array or string
+     * Prepare and escape different values
      * @param mixed
      * @return mixed
      */

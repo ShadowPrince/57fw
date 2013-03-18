@@ -1,6 +1,9 @@
 <?php
 namespace Routing;
 
+/**
+ * Router service
+ */
 class Router extends \Core\Service {
     protected $routings = array();
     protected $request;
@@ -17,18 +20,27 @@ class Router extends \Core\Service {
         );
     }
 
+    /**
+     * Get request
+     */
     public function getRequest() {
         return $this->request;
     }
 
+    /**
+     * Get response
+     */
     public function getResponse() {
         return $this->response;
     }
 
     /**
      * Register callback
+     * @param mixed
      * @param string
      * @param mixed 
+     * @param bool
+     * @return \Routing\Router
      */
     public function register($component, $regex, $instance, $full_regex=false) {
         $this->routings[$regex] = array(
@@ -83,20 +95,6 @@ class Router extends \Core\Service {
         return call_user_func_array($ins, $fargs);
     }
 
-    public function engageResponse() {
-        if ($this->response->getCookies())
-            foreach ($this->response->getCookies() as $args) {
-                call_user_func_array('setcookie', $args);
-            }
-
-        if ($this->response->getHeaders())
-            foreach ($this->response->getHeaders() as $header) {
-                header($header);
-            }
-
-        return $this->response->getBody();
-    }
-
     /**
      * engage router for $url
      * @param string
@@ -118,6 +116,24 @@ class Router extends \Core\Service {
             else
                 throw new \Routing\Ex\RouteNotFoundException($url);
         };
+    }
+
+    /**
+     * Enage response to engine
+     * @return string
+     */
+    public function engageResponse() {
+        if ($this->response->getCookies())
+            foreach ($this->response->getCookies() as $args) {
+                call_user_func_array('setcookie', $args);
+            }
+
+        if ($this->response->getHeaders())
+            foreach ($this->response->getHeaders() as $header) {
+                header($header);
+            }
+
+        return $this->response->getBody();
     }
 
 }

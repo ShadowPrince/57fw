@@ -1,6 +1,9 @@
 <?php
 namespace Orm;
 
+/**
+ * Class for querysets
+ */
 abstract class QuerySet implements \Iterator {
     protected $set = array();
     protected $simple;
@@ -48,7 +51,7 @@ abstract class QuerySet implements \Iterator {
     }
     
     /**
-     * Get length of query set
+     * Get length of query set's set
      * @return int
      */
     public function len() {
@@ -57,6 +60,7 @@ abstract class QuerySet implements \Iterator {
     }
 
     /**
+     * Get set
      * @return array
      */
     public function getSet() {
@@ -92,7 +96,9 @@ abstract class QuerySet implements \Iterator {
     }
 
     /**
-     * Various methods for Iterator
+     * Get instance from $data
+     * @param mixed
+     * @return \Orm\Model
      */
     public function getInstance($data) {
         if ($this->simple)
@@ -104,6 +110,10 @@ abstract class QuerySet implements \Iterator {
                 return $this->manager->get($data);
         }
     }
+
+    /**
+     * Various methods for Iterator
+     */
 
     public function rewind() {
         $this->execute();

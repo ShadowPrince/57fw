@@ -1,11 +1,18 @@
 <?php
 namespace Core;
 
+/**
+ * Dispatcher to work with component
+ */
 class ComponentDispatcher extends \Core\AppDispatcher {
     protected $namespace;
     protected $component;
     protected $models;
 
+    /**
+     * @param string
+     * @param array
+     */
     public function __construct($component, $config=array()) {
         $this->component = $component;
 
@@ -31,7 +38,7 @@ class ComponentDispatcher extends \Core\AppDispatcher {
     }
 
     /**
-     * Proceed app
+     * Proceed component
      * @param \Core\Engine
      */
     public function engage($e) {
@@ -39,7 +46,7 @@ class ComponentDispatcher extends \Core\AppDispatcher {
     }
    
     /**
-     * Get name of app
+     * Get name of component
      * @return string
      */
     public function getName() {
@@ -47,7 +54,7 @@ class ComponentDispatcher extends \Core\AppDispatcher {
     }
 
     /**
-     * get all classes at namespace
+     * Get all classes at namespace
      * @param string
      * @return array
      */

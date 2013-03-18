@@ -2,7 +2,7 @@
 namespace Core;
 
 /** 
- * Interface for dispatchers
+ * Interface for general dispatcher
  */
 abstract class AppDispatcher extends \Core\ConfiguredInstance {
     /**

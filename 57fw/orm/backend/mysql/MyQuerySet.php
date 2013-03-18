@@ -1,6 +1,9 @@
 <?php
 namespace Orm\Backend\MySQL;
 
+/**
+ * MySQL queryset
+ */
 class MyQuerySet extends \Orm\QuerySet {
     protected $manager;
     protected $wh = array(); 
@@ -8,6 +11,9 @@ class MyQuerySet extends \Orm\QuerySet {
     protected $additional = array();
     protected $executed = false;
 
+    /**
+     * @param \Orm\Manager
+     */
     public function __construct($manager) {
         $this->manager = $manager;
     } 
@@ -48,7 +54,7 @@ class MyQuerySet extends \Orm\QuerySet {
     }
     
     /**
-     * Update all query set. $instance = key-value array or instance of model
+     * Update all query set. $instance = key-value array or instance of related model
      * @param mixed
      * @return \Orm\QuerySet
      */
@@ -105,6 +111,7 @@ class MyQuerySet extends \Orm\QuerySet {
     }
 
     /**
+     * Count rows in query
      * @return int
      */
     public function count() {
@@ -121,7 +128,7 @@ class MyQuerySet extends \Orm\QuerySet {
      * Filter queryset
      * @param string
      * @param mixed
-     * @reurn \Orm\QuerySet
+     * @return \Orm\QuerySet
      */
     public function filter($col_fl, $value, $op='and') {
         $col = explode(' ', $col_fl)[0];
@@ -187,8 +194,6 @@ class MyQuerySet extends \Orm\QuerySet {
             return \Orm\ResultSet::implode($instance);
         if ($instance instanceof \DateTime)
             return $instance->format(\Orm\Field\DateTime::$format);
-        if (is_bool($instance)) 
-            return (string) $instance;
 
         return $instance;
     }

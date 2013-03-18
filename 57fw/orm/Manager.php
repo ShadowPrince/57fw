@@ -1,11 +1,19 @@
 <?php
 namespace Orm;
 
+/**
+ * Class for model manager
+ */
 abstract class Manager extends \Core\Service {
     protected $model;
     protected $e;
     public $backend;
 
+    /**
+     * @param \Core\Engine
+     * @param string
+     * @param \Orm\Backend\GeneralBackend
+     */
     public function __construct($e, $model, $backend) {
         $this->model = $model;
         $this->backend = $backend;
@@ -13,8 +21,7 @@ abstract class Manager extends \Core\Service {
     } 
 
     /**
-     * Find instances by $kv and return queryset
-     * @param array
+     * Get queryset
      * @return \Orm\QuerySet
      */
     public function find() {
@@ -24,7 +31,7 @@ abstract class Manager extends \Core\Service {
     /**
      * Find instance by primary key
      * @param int
-     * @throws Exception
+     * @throws \Orm\Ex\OrmException
      * @return \Orm\Model
      */
     public function get($val) {
@@ -44,6 +51,12 @@ abstract class Manager extends \Core\Service {
         return $this->buildInstance($data);
     }
 
+    /**
+     * Dissassembly instance and return $kv. if $changed will return only changed fields
+     * @param \Orm\Model
+     * @param bool
+     * @return array
+     */
     public function dissassembleInstance($instance, $changed=false) {
         $kv = array();
         foreach ($instance->getFields() as $field) {
@@ -54,10 +67,15 @@ abstract class Manager extends \Core\Service {
         return $kv;
     }
 
-    public function buildInstance($data) {
+    /**
+     * Build instance from $kv
+     * @param array
+     * @return \Orm\Model
+     */
+    public function buildInstance($kv) {
         $cls = $this->getModel();
         $instance = new $cls();
-        foreach ($data as $k => $v) {
+        foreach ($kv as $k => $v) {
             if ($instance->getField($k) instanceof \Orm\Field\KeyField) {
                 $instance->getField($k)->setupManager(array($this->e, 'man'));
             }
@@ -70,6 +88,8 @@ abstract class Manager extends \Core\Service {
 
     /**
      * Prepare database for model
+     * @param array
+     * @param callable
      */
     public function prepare($opts, $print_callback) {
         $cls = $this->getModel();
@@ -92,6 +112,7 @@ abstract class Manager extends \Core\Service {
     /**
      * Save (insert or update) instance
      * @param \Orm\Model
+     * @param bool
      */
     public function save($instance, $iknownopk=false) {
         if ($instance->getPKey()) {
@@ -168,17 +189,6 @@ abstract class Manager extends \Core\Service {
         }
 
         return $e->cache['man_' . $model];
-    }
-
-    protected function unserialize($val) {
-        $arr = array();
-
-        foreach (explode(',', $val) as $v) {
-            $data = explode('=', $v);
-            $arr[trim($data[0])] = trim($data[1]);
-        }
-
-        return $arr;
     }
 
 }
