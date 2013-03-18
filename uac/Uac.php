@@ -19,6 +19,8 @@ class Uac extends \Core\Component {
         if ($request->cookie('uac_token')) {
             $user = $man->authTokenLogin($request->cookie('uac_token'));
             $request->user = $user;
+        } else {
+            $request->user = null;
         }
     }
 
@@ -30,7 +32,9 @@ class Uac extends \Core\Component {
         );
         $login_res = $this->login($req);
         if ($login_res instanceof \Http\Response)
-            return $login_res->setBody('registered');
+            return (new \Http\Response('success'))->setCookies(
+                $login_res->getCookies()
+            );
         else 
             return 'something goes wrong';
     }
@@ -51,9 +55,10 @@ class Uac extends \Core\Component {
         );
 
         if ($user) {
-            $res = new \Http\Response('logged');
-            $this->e->man('Uac\Model\User')->login($user, $res);
-            return $res;
+            return $this->e->man('Uac\Model\User')->login(
+                $user, 
+                new \Http\Response('logged')
+            );
         } else {
             return 'invalid';
         }

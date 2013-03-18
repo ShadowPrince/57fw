@@ -20,30 +20,7 @@ function prepareDatabase($e, $opts, $print_callback, $app=false) {
  * Get app path
  */
 function appPath($name) {
-    # return 'app' . DIRECTORY_SEPARATOR .
     return strtolower($name) . DIRECTORY_SEPARATOR;
-}
-
-/**
- * Start new app 
- * @param $name
- */
-function startapp($name) {
-    mkdir(appPath($name) . 'models', 0755, 1);
-    $f = fopen(appPath($name) . 'Urls.php', 'w');
-    fwrite($f, sprintf(
-'<?php
-namespace %s\%s;
-
-class Urls implements \Routing\Urls {
-    public function engage($e) {
-
-    }
-}',
-        'App',
-        $name
-    ));
-    fclose($f);
 }
 
 /**
@@ -90,8 +67,12 @@ $opts = parseArguments($argv);
 print ':: 57fw cli' . PHP_EOL;
 switch (reset($opts)) {
     case 'modeldb':
-        print ':: Preparing database for model ' . $opts[1] . PHP_EOL;
-        $m = $e->man($opts[1]);
+        $model = str_replace('/', '\\', $opts[1]);
+        if (!@class_exists($model)) {
+            die('Class ' . $model . ' dont exists!');
+        }
+        print ':: Preparing database for model ' . $model . PHP_EOL;
+        $m = $e->man($model);
         $m->prepare($opts, 'dottedPrint');
         
     break;
@@ -99,13 +80,6 @@ switch (reset($opts)) {
         print ':: Preparing databases...' . PHP_EOL;
         prepareDatabase($e, $opts, 'dottedPrint', isset($opts[1]) ? $opts[1] : false);
         print ':: Done ';
-    break;
-    case 'startapp':
-        if (!isset($opts[1])) {
-            $opts[1] = readline('  .. Enter name: ');
-        }
-        startapp($opts[1]);
-
     break;
 
     default:

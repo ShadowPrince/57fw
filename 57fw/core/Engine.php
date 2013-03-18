@@ -32,14 +32,16 @@ class Engine {
      * @return string
      */
     public function engage() {
-        $responses = array();
-        if ($this->apps) foreach ($this->apps as $name => $instance) {
-            if ($instance instanceof \Core\AppDispatcher) {
-                $responses[] = $instance->engage($this); 
-            }
-        } 
+        if (!defined('CLI')) {
+            $responses = array();
+            if ($this->apps) foreach ($this->apps as $name => $instance) {
+                if ($instance instanceof \Core\AppDispatcher) {
+                    $responses[] = $instance->engage($this); 
+                }
+            } 
 
-        return implode($responses, '');
+            return implode($responses, '');
+        } else return '';
     }
 
     /**
@@ -48,8 +50,16 @@ class Engine {
      * @param \Core\AppDispatcher
      * @return \Core\Engine
      */
-    public function register($name, $dispatcher) {
-        $this->apps[$name] = $dispatcher;
+    public function register($name, $app) {
+        $this->apps[$name] = $app;
+
+        return $this;
+    }
+
+    public function registerArray($apps) {
+        if ($apps) foreach ($apps as $k => $app) {
+            $this->register($k, $app);
+        }
 
         return $this;
     }

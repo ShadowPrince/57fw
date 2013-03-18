@@ -53,7 +53,7 @@ class UserManager extends \Orm\Manager {
     }
 
     public function login($user, $res) {
-        $res->setCookie(
+        return $res->setCookie(
             'uac_token',
             $user->auth_token,
             time() + 72000,

@@ -68,6 +68,15 @@ class Response {
     }
 
     /**
+     * @param array
+     * @return \Http\Response
+     */
+    public function setCookies($cookies) {
+        $this->cookies = array_merge($this->cookies, $cookies);
+        return $this;
+    }
+
+    /**
      * @return array
      */
     public function getCookies() {

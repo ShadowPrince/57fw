@@ -2,8 +2,18 @@
 define(START, microtime(1));
 
 error_reporting(E_ALL);
-
 spl_autoload_register(function ($classname) {
+    if (0 === strpos($classname, 'Twig')) {
+        $path = ''
+            . dirname(__FILE__)
+            . '/57fw/'
+            . str_replace(array('_', "\0"), array('/', ''), $classname)
+            . '.php';
+
+        include $path;
+        return;
+    }
+
     $parts = explode('\\', $classname);
     $class = array_pop($parts);
     if (!$parts)
@@ -18,13 +28,18 @@ spl_autoload_register(function ($classname) {
         $parts = array_merge(['57fw'], $parts);
     $namespace = strtolower(implode(DIRECTORY_SEPARATOR, $parts));
 
-    include_once $namespace . DIRECTORY_SEPARATOR . $class . '.php';
+    include $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 });
-
 
 $e = new \Core\Engine();
 $e
     ->register('http', (new Http\Http()))
+    ->register('twig', (new Twig_Environment(
+        new Twig_Loader_Filesystem('tpl/'),
+        array(
+            'cache' => 'tpl/cache'
+        )
+    )))
     ->register('router', (new Routing\Router(array(
         'add_trailing_slash' => 1
     ))))
@@ -33,7 +48,7 @@ $e
         'password' => '1',
         'host' => 'localhost',
         'database' => '57fw',
-        'debug' => 1
+        'debug' => true
     )))
     ->register('man', function ($model) { 
         global $e;

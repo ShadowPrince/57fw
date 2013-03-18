@@ -32,4 +32,22 @@ class Http extends \Core\Service {
     public function getDomain() {
         return $this->server['SERVER_NAME'];
     }
+
+    /**
+     * @param \Http\Response
+     * @return string
+     */
+    public function engageResponse($response) {
+        if ($response->getCookies())
+            foreach ($response->getCookies() as $args) {
+                call_user_func_array('setcookie', $args);
+            }
+
+        if ($response->getHeaders())
+            foreach ($response->getHeaders() as $header) {
+                header($header);
+            }
+
+        return $response->getBody();
+    }
 }
