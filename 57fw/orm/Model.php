@@ -33,8 +33,9 @@ abstract class Model {
         if ($this->fields[$attr] instanceof \Orm\Field\Field) {
             $f = $this->fields[$attr];
             $f->setValue($value);
-        } else
-            $this->fields[$attr] = $value;
+        } else {
+            throw new \Orm\Ex\FieldNotFoundException($attr);
+        }
     }
 
     /*
@@ -42,12 +43,7 @@ abstract class Model {
      * Used in QuerySet update
      */
     public function __call($fn, $args) {
-        if (method_exists($this, $fn)) {
-            return call_user_func_array(
-                array($this, $fn),
-                $args
-            );
-        } else if (count($args) == 1) {
+        if (count($args) == 1) {
             $this->getField($fn)->setValue($args[0]);
             return $this;
         } else if (count($args) == 0) {
@@ -65,7 +61,7 @@ abstract class Model {
         if (isset($this::$pkey))
             return $this->getField($this::$pkey);
         else
-            throw new \Orm\Ex\PKeyRequiredException('getPKey() call');
+            return null;
     }
 
     /**
@@ -84,6 +80,10 @@ abstract class Model {
     public function getField($name) {
         return $this->fields[$name];
     }
+
+    public function populate($e) {
+
+    }
     
     /**
      * createFields by model vars
@@ -101,7 +101,7 @@ abstract class Model {
             }
         }
 
-        $ami = get_class($this);
+        /*$ami = get_class($this);
         if (!$ami::$table) { 
             $arr = explode('\\', get_class($this));
             $ami::$table = strtolower(
@@ -111,6 +111,6 @@ abstract class Model {
 
         if (!$ami::$pkey && $pkey) {
             $ami::$pkey = $pkey->getName();
-        }
+        }*/
     }
 }

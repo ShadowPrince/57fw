@@ -11,18 +11,25 @@ class ForeignList extends \Orm\Field\ForeignKey {
         if ($list) foreach ($list as $instance) {
             if ($instance instanceof $model) {
                 $ids[] = $instance->getPKey()->getValue();
+            } else if ((string) (int) $instance == $instance) {
+                $ids[] = $instance;
+            } else if ($instance instanceof \Orm\Model) {
+                throw new \Orm\Ex\FieldValueException(
+                    $this,
+                    'instance of ' . get_class($instance)
+                );
             } else throw new \Orm\Ex\FieldValueException(
-                $this->getName(),
-                'instance of ' . get_class($instance)
+                $this,
+                'instance of ' . $instance
             );
         }
 
-        $this->value = \Orm\ResultSet::implode($ids);
+        $this->value = \Orm\QuerySet::implode($ids);
         $this->changed = 1;
     }
 
     public function getValue() {
-        return new \Orm\ResultSet(array($this->manager, 'get'),
-            \Orm\ResultSet::explode($this->value), false);
+        $qs = $this->manager->find();
+        return $qs->setSet($qs::explode($this->value))->setExecuted(true);
     }
 }

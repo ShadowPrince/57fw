@@ -64,8 +64,7 @@ class Request {
      * @return string
      */
     public function getRequestPath() {
-        if (isset($this->server['PATH_INFO']))
-            return $this->server['PATH_INFO'];
+        return $this->server['PATH_INFO'];
     }
 
     /**

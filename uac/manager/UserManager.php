@@ -19,7 +19,7 @@ class UserManager extends \Orm\Manager {
             ->count()
         ) throw new \Uac\Ex\UserExistException($username, $email);
             
-        $user = new \Uac\Model\User();
+        $user = $this->getInstance();
         $user->username = $username;
         $user->password = $this->encryptPassword($raw_password);
         $user->email = $email;
@@ -52,6 +52,12 @@ class UserManager extends \Orm\Manager {
         }
     }
 
+    /**
+     * Login $user to $res
+     * @param \Uac\Model\User
+     * @param \Http\Response
+     * return \Http\Response
+     */
     public function login($user, $res) {
         return $res->setCookie(
             'uac_token',
@@ -94,8 +100,14 @@ class UserManager extends \Orm\Manager {
      * Logout user (change auth token)
      * @param \Auth\Entity\User $user
      */
-    public function logout($user) {
+    public function logout($user, $res) {
         $user->auth_token = $this->generateToken($user);
+        return $res->setCookie(
+            'uac_token',
+            'nope',
+            time() - 72000,
+            '/'
+        );
     }
 
     /**

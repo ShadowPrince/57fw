@@ -14,11 +14,25 @@ class DateTime extends Field {
     }
 
     public function setValue($val) {
-        if ($val instanceof \DateTime)
+        if (!$val) {
+            throw new \Orm\Ex\FieldValueException($this, $val);
+        } else if ($val instanceof \DateTime) {
             parent::setValue($val->format(self::$format));
-        else try {
-            return $this->setValue(new \DateTime($val));
-        } catch (\Exception $e) {
+            return $this;
+        } else if (is_string($val)) {
+            $dt = \DateTime::createFromFormat(
+                $this::$format,
+                $val
+            );
+        } else if (is_array($val)) {
+            $dt = call_user_func_array('\DateTime::createFromFormat', $val);
+        } else {
+            $dt = false;
+        }
+
+        if ($dt) {
+            return $this->setValue($dt);
+        } else {
             throw new \Orm\Ex\FieldValueException($this, $val);
         }
     }

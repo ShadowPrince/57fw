@@ -3,15 +3,22 @@ namespace Orm\Field;
 
 class ForeignKey extends KeyField {
     protected $type = 'int';
+    protected $instance;
     protected $model;
 
-    public function __construct($model) {
-        if (is_string($model))
-            $this->model = $model; 
-        else
-            $this->model = get_class($model);
+    public function __construct($model, $params=array()) {
+        $this->setModel($model);
+        parent::__construct($params);
+    }
 
-        parent::__construct();
+    public function setModel($model) {
+        if (is_string($model)) {
+            $this->model = $model; 
+        } else if ($model == null) {
+            $this->model = null;
+        } else {
+            $this->model = get_class($model);
+        }
     }
 
     public function getManager($getter) {

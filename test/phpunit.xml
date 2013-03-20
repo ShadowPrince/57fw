@@ -1,0 +1,16 @@
+<phpunit stopOnFailure="false">
+    <testsuite name="Name">
+    </testsuite>
+
+    <filter>
+        <whitelist>
+            <exclude>
+                <directory>../57fw/twig/Twig</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+    <logging>
+    </logging>
+
+</phpunit>

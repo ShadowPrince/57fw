@@ -4,7 +4,7 @@ namespace Orm;
 /**
  * Class for model manager
  */
-abstract class Manager extends \Core\Service {
+class Manager extends \Core\Service {
     protected $model;
     protected $e;
     public $backend;
@@ -48,7 +48,9 @@ abstract class Manager extends \Core\Service {
         else
             $data = $data[0];
 
-        return $this->buildInstance($data);
+        $ins = $this->buildInstance($data);
+        $ins->populate($this->e);
+        return $ins;
     }
 
     /**
@@ -73,8 +75,7 @@ abstract class Manager extends \Core\Service {
      * @return \Orm\Model
      */
     public function buildInstance($kv) {
-        $cls = $this->getModel();
-        $instance = new $cls();
+        $instance = $this->getModelInstance();
         foreach ($kv as $k => $v) {
             if ($instance->getField($k) instanceof \Orm\Field\KeyField) {
                 $instance->getField($k)->setupManager(array($this->e, 'man'));
@@ -132,7 +133,11 @@ abstract class Manager extends \Core\Service {
         if (isset($wh)) {
             $this->backend->update($this, $this->dissassembleInstance($instance), $wh);
         } else {
-            $this->backend->insert($this, $this->dissassembleInstance($instance));
+            $id = $this->backend->insert($this, $this->dissassembleInstance($instance));
+            if ($instance->getPKey())  {
+                $instance->getPKey()->setValue($id);
+            } 
+
         }
 
     }
@@ -160,9 +165,9 @@ abstract class Manager extends \Core\Service {
      */
     public function getModelInstance() {
         $cls = $this->getModel();
-        if (!isset($this->modelInstance))
-            $this->modelInstance = new $cls();
-        return $this->modelInstance;
+        $ins = new $cls();
+        $ins->populate($this->e);
+        return $ins;
     }
 
     /**
@@ -177,6 +182,8 @@ abstract class Manager extends \Core\Service {
 
         } else if ($model instanceof \Orm\Model) {
             $model = get_class($model);
+        } else if ($model == null) {
+            return;
         }
 
         if (!isset($e->cache['man_' . $model])) {

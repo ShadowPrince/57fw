@@ -51,23 +51,27 @@ $e
         'password' => '1',
         'debug' => $e->config('debug')
     )))
-    ->register('man', function ($model) { 
-        global $e;
+    ->register('man', function ($e, $model) { 
         return \Orm\Manager::manGetter($e, $model);
     })
     ->register('uac', new \Core\ComponentDispatcher('\Uac\Uac', array(
         'secret_token' => '1',
-        'url_prefix' => '/uac/'
+        'url_prefix' => '/uac/',
+        'profile_model' => '\Uac\Model\Profile'
     )))
     ->register('router_dispatcher', new \Routing\RouterDispatcher())
     ->register('router_dispatcher_response', new \Routing\RouterDispatcher(array(
         'engage_response' => 1
     )))
 
-    ->router->register(null, '/', function ($req) { 
+    /**
+     * @TODO: update instance on save
+     */
+    ->router->register('/', function ($req) { 
         global $e;
+
         return $e->twig->render('mainpage.html');
-    })
+    }, null)
 ;
 
 if (!defined('CLI')) {

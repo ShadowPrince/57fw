@@ -50,12 +50,20 @@ abstract class QuerySet implements \Iterator {
         return $this->filter($field . ' ' . $flag, $value);
     }
     
+    public function setExecuted($executed) {
+        $this->executed = $executed;
+        return $this;
+    }
+
+    public function getExecuted() {
+        return $this->executed;
+    }
+
     /**
      * Get length of query set's set
      * @return int
      */
     public function len() {
-        $this->execute();
         return count($this->set);
     }
 
@@ -66,6 +74,15 @@ abstract class QuerySet implements \Iterator {
     public function getSet() {
         $this->execute();
         return $this->set;
+    }
+
+    /**
+     * Set set
+     * @param array
+     */
+    public function setSet($set) {
+        $this->set = $set;
+        return $this;
     }
 
     /**

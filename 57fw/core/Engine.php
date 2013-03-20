@@ -10,9 +10,16 @@ class Engine extends \Core\ConfiguredInstance {
     protected $services;
     public $cache;
 
+    /**
+     * Getter for apps
+     * @param string
+     * @return mixed
+     */
     public function __get($name) {
         if (isset($this->apps[$name]))
             return $this->apps[$name];
+        else
+            throw new \Core\Ex\AppNotFoundException($name);
     }
 
     /**
@@ -22,9 +29,7 @@ class Engine extends \Core\ConfiguredInstance {
      * @return mixed
      */
     public function __call($func, $args) {
-        if (is_callable($this->apps[$func])) {
-            return call_user_func_array($this->apps[$func], $args);
-        } 
+        return call_user_func_array($this->apps[$func], array_merge(array($this), $args));
     }
 
     /**
@@ -32,16 +37,14 @@ class Engine extends \Core\ConfiguredInstance {
      * @return string
      */
     public function engage() {
-        if (!defined('CLI')) {
-            $responses = array();
-            if ($this->apps) foreach ($this->apps as $name => $instance) {
-                if ($instance instanceof \Core\AppDispatcher) {
-                    $responses[] = $instance->engage($this); 
-                }
-            } 
+        $responses = array();
+        if ($this->apps) foreach ($this->apps as $name => $instance) {
+            if ($instance instanceof \Core\AppDispatcher) {
+                $responses[] = $instance->engage($this); 
+            }
+        } 
 
-            return implode($responses, '');
-        } else return '';
+        return implode($responses, '');
     }
 
     /**

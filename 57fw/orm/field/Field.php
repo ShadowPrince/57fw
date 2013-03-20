@@ -2,7 +2,7 @@
 namespace Orm\Field;
 
 abstract class Field {
-    protected $type, $val, $default_val, $changed;
+    protected $type, $val, $changed;
     protected $value = null;
     protected $params = array();
 
@@ -13,7 +13,6 @@ abstract class Field {
         if ($this->param('value') !== null)
             $this->setValue($this->param('value'));
 
-        $this->default_val = $this->val;
     }
 
     public function param($k) {
@@ -34,10 +33,6 @@ abstract class Field {
      * @return string
      */
     public function getName() {return $this->name;}
-    /**
-     * @return mixed
-     */
-    public function defaultValue() {return $this->default_value;}
     /**
      * @return mixed
      */ 

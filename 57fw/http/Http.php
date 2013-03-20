@@ -7,14 +7,26 @@ namespace Http;
 class Http extends \Core\Service {
     protected $response, $request;
 
-    public function __construct() {
-        $this->request = new \Http\Request(
-            $_SERVER,
-            $_GET,
-            $_POST,
-            $_FILES,
-            $_COOKIE
-        );
+    public function __construct($config=array()) {
+        parent::__construct($config);
+
+        if (!$this->config()) {
+            $this->request = new \Http\Request(
+                $_SERVER,
+                $_GET,
+                $_POST,
+                $_FILES,
+                $_COOKIE
+            ); 
+        } else {
+            $this->request = new \Http\Request(
+                $this->config('server'),
+                $this->config('get'),
+                $this->config('post'),
+                $this->config('files'),
+                $this->config('cookie')
+            );
+        }
     }
 
     /**
@@ -37,6 +49,11 @@ class Http extends \Core\Service {
         return $this;
     }
 
+    public function setRequest($req) {
+        $this->request = $req;
+
+        return $this;
+    }
     /**
      * @return string
      */

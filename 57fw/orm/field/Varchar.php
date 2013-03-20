@@ -21,6 +21,10 @@ class Varchar extends Field {
             throw new \Orm\Ex\FieldValueException($this, '((VALUE DONT CONVERTS TO STR))');
         }
 
+        if (strlen($val) > $this->length) {
+            throw new \Orm\Ex\FieldValueException($this, 'value "' . $val . '" longer that ' . $this->length . ' (' . strlen($val) . ')');
+        }
+
         return parent::setValue($val);
     }
 }

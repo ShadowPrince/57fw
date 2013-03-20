@@ -5,9 +5,9 @@ class Uac extends \Core\Component {
     public function engage($e) {
         $this->e = $e;
 
-        $e->router->register($this, 'login/', array($this, 'login'));
-        $e->router->register($this, 'logout/', array($this, 'logout'));
-        $e->router->register($this, 'register/', array($this, 'register'));
+        $e->router->register('login/', array($this, 'login'), $this);
+        $e->router->register('logout/', array($this, 'logout'), $this);
+        $e->router->register('register/', array($this, 'register'), $this);
 
         $this->cookieLogin();
     }
@@ -40,12 +40,14 @@ class Uac extends \Core\Component {
     }
 
     public function logout($req) {
-        return (new \Http\Response('logged out'))->setCookie(
-            'uac_token',
-            'nope',
-            time() - 72000,
-            '/'
+        if ($req->user)  {
+            return $this->e->man('Uac\Model\User')->logout(
+                $req->user,
+                new \Http\Response('logouted')
         );
+        } else {
+            return 'not logged';
+        }
     }
 
     public function login($req) {

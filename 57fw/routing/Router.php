@@ -15,13 +15,13 @@ class Router extends \Core\Service {
 
     /**
      * Register callback
-     * @param mixed
      * @param string
      * @param mixed 
+     * @param mixed
      * @param bool
      * @return \Routing\Router
      */
-    public function register($component, $regex, $instance, $full_regex=false) {
+    public function register($regex, $instance, $component=null, $full_regex=false) {
         $this->routings[$regex] = array(
             'instance' => $instance, 
             'full_regex' => $full_regex,
@@ -91,7 +91,7 @@ class Router extends \Core\Service {
         } else {
             $url_arr = str_split($url);
             if (array_pop($url_arr) != '/' && $this->config('add_trailing_slash'))
-                return $this->engage($url . '/');
+                return $this->engage($req, $url . '/');
             else
                 throw new \Routing\Ex\RouteNotFoundException($url);
         };

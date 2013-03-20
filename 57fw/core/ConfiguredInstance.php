@@ -19,7 +19,9 @@ class ConfiguredInstance {
      * @param mixed
      * @return mixed
      */
-    public function config($k) {
+    public function config($k=null) {
+        if (!$k)
+            return $this->config;
         if (isset($this->config[$k]))
             return $this->config[$k];
     }

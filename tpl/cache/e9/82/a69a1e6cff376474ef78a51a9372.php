@@ -47,13 +47,26 @@ class __TwigTemplate_e982a69a1e6cff376474ef78a51a9372 extends Twig_Template
         ";
             }
             // line 17
+            echo "        ";
+            if (twig_template_get_attributes($this, twig_template_get_attributes($this, (isset($context["req"]) ? $context["req"] : null), "user"), "profile")) {
+                // line 18
+                echo "            Profile: ";
+                echo twig_escape_filter($this->env, twig_template_get_attributes($this, twig_template_get_attributes($this, twig_template_get_attributes($this, (isset($context["req"]) ? $context["req"] : null), "user"), "profile"), "id"), "html", null, true);
+                echo ", bio: 
+            ";
+                // line 19
+                echo twig_escape_filter($this->env, twig_template_get_attributes($this, twig_template_get_attributes($this, twig_template_get_attributes($this, (isset($context["req"]) ? $context["req"] : null), "user"), "profile"), "bio"), "html", null, true);
+                echo ".
+        ";
+            }
+            // line 21
             echo "    ";
         } else {
-            // line 18
+            // line 22
             echo "        Hello, stranger!
     ";
         }
-        // line 20
+        // line 24
         echo "</body>
 </html>
 ";
@@ -71,6 +84,6 @@ class __TwigTemplate_e982a69a1e6cff376474ef78a51a9372 extends Twig_Template
 
     public function getDebugInfo()
     {
-        return array (  57 => 20,  53 => 18,  50 => 17,  46 => 15,  42 => 13,  40 => 12,  36 => 11,  30 => 9,  28 => 8,  19 => 1,);
+        return array (  70 => 24,  66 => 22,  63 => 21,  58 => 19,  53 => 18,  50 => 17,  46 => 15,  42 => 13,  40 => 12,  36 => 11,  30 => 9,  28 => 8,  19 => 1,);
     }
 }

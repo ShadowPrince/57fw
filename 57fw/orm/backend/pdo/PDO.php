@@ -52,6 +52,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
             $manager->getTable(),
             $this->setParamsImplode($kv)
         );
+        return $this->dbh->lastInsertId();
     }
 
     public function delete($manager, $wh, $additions=array()) {
@@ -140,7 +141,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
             if (count($sql)) {
                 if (!isset($opts['force'])) {
                     $print_callback(sprintf(
-                        'Table for %s already exists, add -force to modify it. ',
+                        'Table for %s already exists, add --force to modify it. ',
                         $manager->getModel()
                     ));
                     $sql = array();
@@ -192,7 +193,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
 
     }
 
-    protected function build() {
+    public function build() {
         $args = func_get_args();
 
         $qw = array_shift($args);
@@ -212,7 +213,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
         );
     }
 
-    protected function execute($st, $data) {
+    public function execute($st, $data) {
         try {
             $st->execute($data);
             return $st;
@@ -228,7 +229,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
         $sql = array();
         $data = array();
         foreach ($kv as $k => $v) {
-            $sql[] = $k . ' = ?';
+            $sql[] = '`' . $k . '` = ?';
             $data[] = $v;
         }
 
@@ -241,12 +242,17 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
     protected function whereParamsImplode($wh) {
         $qw = '';
         $sql = array_map(function ($el) {
-            return $el[0];
+            if (is_array($el))
+                return reset($el);
+            else
+                return $el;
         }, $wh);
         $data = array();
         foreach ($wh as $el) {
-            array_shift($el);
-            $data = array_merge($data, $el);
+            if (is_array($el)) {
+                array_shift($el);
+                $data = array_merge($data, $el);
+            }
         }
 
         return array(
@@ -266,14 +272,14 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
         return $data;
     }
 
-    protected function buildExecuteFetch() {
+    public function buildExecuteFetch() {
         return $this->fetchArray(call_user_func_array(
             array($this, 'buildExecute'),
             func_get_args()
         ));
     }
 
-    protected function buildExecute() {
+    public function buildExecute() {
         return call_user_func_array(
             array($this, 'execute'),
             call_user_func_array(
@@ -349,7 +355,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
      * @return string
      */
     protected function provideField($field) {
-        $params = array($field->getName() . ' ' . strtoupper($field->getType()));
+        $params = array('`' . $field->getName() . '` ' . strtoupper($field->getType()));
         if ($field->param('null') != true)
             $params[] = 'NOT NULL';
 
