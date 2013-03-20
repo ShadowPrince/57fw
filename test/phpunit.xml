@@ -4,8 +4,9 @@
 
     <filter>
         <whitelist>
+            <directory suffix=".php">../57fw</directory>
             <exclude>
-                <directory>../57fw/twig/Twig</directory>
+                <directory suffix=".php">../57fw/twig/Twig/</directory>
             </exclude>
         </whitelist>
     </filter>
