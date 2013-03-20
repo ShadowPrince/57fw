@@ -1,5 +1,5 @@
 <phpunit stopOnFailure="false">
-    <testsuite name="Name">
+    <testsuite name="TestSuite">
     </testsuite>
 
     <filter>
