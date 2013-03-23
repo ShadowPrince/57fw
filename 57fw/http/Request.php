@@ -52,6 +52,17 @@ class Request {
         else if (isset($this->cookies[$k]))
             return $this->cookies[$k];
     }
+    
+    /**
+     * @param mixed
+     * @return array
+     */
+    public function file($k=false) {
+        if (!$k)
+            return $this->files;
+        else if (isset($this->files[$k]))
+            return $this->files[$k];
+    }
 
     /**
      * @return string
@@ -64,7 +75,10 @@ class Request {
      * @return string
      */
     public function getRequestPath() {
-        return $this->server['PATH_INFO'];
+        if (isset($this->server['PATH_INFO'])) 
+            return $this->server['PATH_INFO'];
+        else
+            return '/';
     }
 
     /**

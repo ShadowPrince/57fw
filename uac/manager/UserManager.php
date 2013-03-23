@@ -19,9 +19,9 @@ class UserManager extends \Orm\Manager {
             ->count()
         ) throw new \Uac\Ex\UserExistException($username, $email);
             
-        $user = $this->getInstance();
+        $user = $this->getModelInstance();
         $user->username = $username;
-        $user->password = $this->encryptPassword($raw_password);
+        $user->password = $this->encryptPassword($user->username, $raw_password);
         $user->email = $email;
 
         $this->save($user);
@@ -38,7 +38,7 @@ class UserManager extends \Orm\Manager {
     public function credentialsLogin($username, $password) {
         $user = $this->find()
             ->filter('username =', $username)
-            ->filter('password =', $this->encryptPassword($password))
+            ->filter('password =', $this->encryptPassword($username, $password))
             ->current();
 
         if ($user) {
@@ -130,7 +130,14 @@ class UserManager extends \Orm\Manager {
      * @param strng $raw_password
      * @return string
      */
-    private function encryptPassword($raw_password) {
+    private function encryptPassword($username, $raw_password) {
         return $raw_password;
+        /*
+        return md5(''
+            . $this->e->uac->config('secret_token')
+            . $username
+            . $raw_password
+        ); 
+        */
     }
 }

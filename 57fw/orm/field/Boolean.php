@@ -1,6 +1,6 @@
 <?php
 namespace Orm\Field;
 
-class Boolean extends \Orm\Field\Field {
+class Boolean extends Field {
     protected $type = 'boolean';
 }

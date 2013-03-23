@@ -1,17 +1,20 @@
-<phpunit stopOnFailure="false">
-    <testsuite name="TestSuite">
-    </testsuite>
+<phpunit 
+    stopOnFailure="false" 
+    bootstrap="bootstrap.php"
+    >
 
     <filter>
         <whitelist>
-            <directory suffix=".php">../57fw</directory>
+            <directory suffix=".php">../</directory>
             <exclude>
-                <directory suffix=".php">../57fw/twig/Twig/</directory>
+                <directory>../test/</directory>
+                <directory>../tpl/</directory>
+                <directory>../57fw/twig/Twig/</directory>
+                <directory>../57fw/orm/backend/mysql/</directory>
             </exclude>
         </whitelist>
     </filter>
 
     <logging>
     </logging>
-
 </phpunit>

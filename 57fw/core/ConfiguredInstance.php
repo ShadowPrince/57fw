@@ -5,13 +5,13 @@ namespace Core;
  * Handles configuration of apps
  */
 class ConfiguredInstance {
-    protected $config;
+    protected $config = array();
 
     /**
      * @param array
      */
     public function __construct($config=array()) {
-        $this->config = $config;
+        $this->config = array_merge($this->config, $config);
     }
     
     /**

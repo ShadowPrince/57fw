@@ -19,7 +19,7 @@ abstract class Model {
      */
     public function __get($attr) {
         if (!isset($this->fields[$attr]))
-            throw new \Orm\Ex\FieldNotFoundException($attr);
+            throw new Ex\FieldNotFoundException($attr);
         return $this->fields[$attr]->getValue();
     }
 
@@ -30,11 +30,11 @@ abstract class Model {
      * @return mixed
      */
     public function __set($attr, $value) {
-        if ($this->fields[$attr] instanceof \Orm\Field\Field) {
+        if ($this->fields[$attr] instanceof Field\Field) {
             $f = $this->fields[$attr];
             $f->setValue($value);
         } else {
-            throw new \Orm\Ex\FieldNotFoundException($attr);
+            throw new Ex\FieldNotFoundException($attr);
         }
     }
 
@@ -81,9 +81,7 @@ abstract class Model {
         return $this->fields[$name];
     }
 
-    public function populate($e) {
-
-    }
+    public function populate($e) {}
     
     /**
      * createFields by model vars
@@ -94,8 +92,8 @@ abstract class Model {
             if (is_string($v) && substr($v, 0, 3) == 'new') {
                 $eval = '$this->fields[$k] = ' . $v . ';';
                 eval($eval);
-                $this->fields[$k]->name = $k;
-                if ($this->fields[$k] instanceof \Orm\Field\PrimaryKey)
+                $this->fields[$k]->setName($k);
+                if ($this->fields[$k] instanceof Field\PrimaryKey)
                     $pkey = $this->fields[$k];
                 unset($this->$k);
             }

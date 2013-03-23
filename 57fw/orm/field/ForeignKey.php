@@ -5,6 +5,7 @@ class ForeignKey extends KeyField {
     protected $type = 'int';
     protected $instance;
     protected $model;
+    protected $manager;
 
     public function __construct($model, $params=array()) {
         $this->setModel($model);

@@ -8,6 +8,10 @@ class TwigTest extends \PHPUnit_Framework_Testcase {
             'loader' => 'string',
             'debug' => true
         )));
+        new \Twig\Twig(array(
+            'path' => '.',
+            'cache' => '.',
+        ));
         $e->register('http', new \Http\Http());
 
         return $e;

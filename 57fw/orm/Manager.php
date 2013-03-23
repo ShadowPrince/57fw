@@ -6,6 +6,7 @@ namespace Orm;
  */
 class Manager extends \Core\Service {
     protected $model;
+    protected $model_instance;
     protected $e;
     public $backend;
 
@@ -15,7 +16,12 @@ class Manager extends \Core\Service {
      * @param \Orm\Backend\GeneralBackend
      */
     public function __construct($e, $model, $backend) {
-        $this->model = $model;
+        if (is_string($model)) {
+            $this->model = $model;
+        } else {
+            $this->model = get_class($model);
+            $this->model_instance = $model;
+        }
         $this->backend = $backend;
         $this->e = $e;
     } 
@@ -37,14 +43,14 @@ class Manager extends \Core\Service {
     public function get($val) {
         $php_is_dummy = $this->getModel();
         if (!$php_is_dummy::$pkey)
-            throw new \Orm\Ex\PKeyRequiredException('get');
+            throw new Ex\PKeyRequiredException('get');
          
         $data = $this->backend->select($this, array(
             array("`" . $php_is_dummy::$pkey . "` = ?", $val)
         ), array('*'));
 
         if (!$data)
-            throw new \Orm\Ex\RowNotFoundException('PKey = ' . $val);
+            throw new Ex\RowNotFoundException('PKey = ' . $val);
         else
             $data = $data[0];
 
@@ -77,10 +83,10 @@ class Manager extends \Core\Service {
     public function buildInstance($kv) {
         $instance = $this->getModelInstance();
         foreach ($kv as $k => $v) {
-            if ($instance->getField($k) instanceof \Orm\Field\KeyField) {
+            if ($instance->getField($k) instanceof Field\KeyField) {
                 $instance->getField($k)->setupManager(array($this->e, 'man'));
             }
-            if ($instance->getField($k) instanceof \Orm\Field\Field) {
+            if ($instance->getField($k) instanceof Field\Field) {
                 $instance->getField($k)->forceValue($v);
             }  
         } 
@@ -97,7 +103,7 @@ class Manager extends \Core\Service {
         if (!isset($cls::$pkey)) {
             $fields = $this->getModelInstance()->getFields();
             if ($fields) foreach ($fields as $f) {
-                if ($f instanceof \Orm\Field\PrimaryKey) {
+                if ($f instanceof Field\PrimaryKey) {
                     $print_callback(sprintf(
                         'Model %s has primary key %s, but static variable $pk not setted!'
                         . PHP_EOL . ' (!) THAT MY CAUSE ERRORS!', 
@@ -115,7 +121,9 @@ class Manager extends \Core\Service {
      * @param \Orm\Model
      * @param bool
      */
-    public function save($instance, $iknownopk=false) {
+    public function save($instance=false, $iknownopk=false) {
+        if (!$instance)
+            $instance = $this->model_instance;
         if ($instance->getPKey()) {
             if ($instance->getPKey()->getValue()) {
                 $wh = array(
@@ -127,7 +135,7 @@ class Manager extends \Core\Service {
             }
         } else {
             if (!$iknownopk)
-                throw new \Orm\Ex\OrmException('save() only insert instances with no primary key, not update. If you want to do it, provide second argument of save ($iknownopk). If you wanna update it - use queryset\'s update().');
+                throw new Ex\OrmException('save() only insert instances with no primary key, not update. If you want to do it, provide second argument of save ($iknownopk). If you wanna update it - use queryset\'s update().');
         }
 
         if (isset($wh)) {
@@ -156,6 +164,12 @@ class Manager extends \Core\Service {
      * @return string
      */
     public function getModel() {
+        $cls = $this->model;
+        if ($cls::$table == null) {
+            $ns = explode('\\', $cls);
+            $cls::$table = strtolower(array_pop($ns));
+        }
+
         return $this->model;
     }
 
@@ -178,6 +192,7 @@ class Manager extends \Core\Service {
      * @return \Orm\Manager
      */
     public static function manGetter($e, $model) {
+        $instance = $model;
         if (is_string($model)) {
 
         } else if ($model instanceof \Orm\Model) {
@@ -192,7 +207,7 @@ class Manager extends \Core\Service {
             } else {
                 $man = get_class();
             }
-            $e->cache['man_' . $model] = new $man($e, $model, $e->db);
+            $e->cache['man_' . $model] = new $man($e, $instance, $e->db);
         }
 
         return $e->cache['man_' . $model];

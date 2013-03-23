@@ -3,30 +3,37 @@ namespace Http;
 
 /**
  * Service for HTTP workflow
+ * @TODO: abort response
+ * @TODO: redirect
  */
 class Http extends \Core\Service {
     protected $response, $request;
 
     public function __construct($config=array()) {
+        $this->config = array(
+            'server' => $_SERVER,
+            'get' => $_GET,
+            'post' => $_POST,
+            'files' => $_FILES,
+            'cookie' => $_COOKIE
+        );
         parent::__construct($config);
 
-        if (!$this->config()) {
-            $this->request = new \Http\Request(
-                $_SERVER,
-                $_GET,
-                $_POST,
-                $_FILES,
-                $_COOKIE
-            ); 
-        } else {
-            $this->request = new \Http\Request(
-                $this->config('server'),
-                $this->config('get'),
-                $this->config('post'),
-                $this->config('files'),
-                $this->config('cookie')
-            );
-        }
+        $this->request = new \Http\Request(
+            $this->config('server'),
+            $this->config('get'),
+            $this->config('post'),
+            $this->config('files'),
+            $this->config('cookie')
+        );
+    }
+
+    public static function createResponse($res) {
+        if ($res instanceof Response)
+            return $res;
+        else if (is_string($res))
+            return new Response($res);
+        else return new JSONResponse($res);
     }
 
     /**
@@ -58,6 +65,9 @@ class Http extends \Core\Service {
      * @return string
      */
     public function engageResponse() {
+        if (!$this->getResponse()) 
+            throw new Ex\NoResponseProvidedException();
+
         if ($this->getResponse()->getCookies())
             foreach ($this->getResponse()->getCookies() as $args) {
                 call_user_func_array('setcookie', $args);

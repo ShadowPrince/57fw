@@ -3,6 +3,7 @@ namespace Orm\Field;
 
 class Varchar extends Field {
     protected $type = 'varchar(%d)';
+    protected $length;
 
     public function __construct($len, $params=array()) {
         $this->length = $len;

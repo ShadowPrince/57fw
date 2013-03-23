@@ -8,7 +8,7 @@ class HttpTest extends \PHPUnit_Framework_TestCase {
                 'server' => true,
                 'SERVER_NAME' => 'localhost',
                 'REQUEST_URI' => '/',
-                'PATH_INFO' => '/'
+                'PATH_INFO' => '/test/'
             ),
 
             array('get' => true),
@@ -42,8 +42,11 @@ class HttpTest extends \PHPUnit_Framework_TestCase {
     /** @depends testCreateRequest */
     public function testRequestServerVars($r) {
         $this->assertEquals($r->getFullURL(), 'localhost/');
-        $this->assertEquals($r->getRequestPath(), '/');
+        $this->assertEquals($r->getRequestPath(), '/test/');
         $this->assertEquals($r->getDomain(), 'localhost');
+
+        $req = new \Http\Request(array());
+        $this->assertEquals($req->getRequestPath(), '/');
     }
 
     

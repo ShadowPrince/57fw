@@ -7,6 +7,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
     
     public function __construct($config) {
         parent::__construct($config);
+
         $this->dbh = new \PDO($config['uri'], $config['user'], $config['password']);
         $this->dbh->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION); 
     }

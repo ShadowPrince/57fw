@@ -3,6 +3,7 @@ namespace Routing;
 
 /**
  * Router service
+ * @TODO: make url
  */
 class Router extends \Core\Service {
     protected $routings = array();
@@ -10,6 +11,10 @@ class Router extends \Core\Service {
     protected $response;
 
     public function __construct() {
+        $this->config = array(
+            'add_trailing_slash' => false
+        );
+
         call_user_func_array('parent::__construct', func_get_args());
     }
 
@@ -21,12 +26,32 @@ class Router extends \Core\Service {
      * @param bool
      * @return \Routing\Router
      */
-    public function register($regex, $instance, $component=null, $full_regex=false) {
+    public function register($regex, $bind, $instance, $component=null, $full_regex=false) {
         $this->routings[$regex] = array(
             'instance' => $instance, 
             'full_regex' => $full_regex,
             'url_prefix' => $component instanceof \Core\Component ? $component->config('url_prefix') : '' 
         );
+
+        return $this;
+    }
+
+    /**
+     * Register array of routings
+     *
+     * @param array
+     * @return \Routing\Router
+     */
+    public function registerArray($array) {
+        foreach ($array as $k => $v) {
+            $this->register(
+                $v['regex'],
+                $k,
+                $v['instance'],
+                isset($v['component']) ? $v['component'] : null,
+                isset($v['full_regex']) ? $v['full_regex'] : null
+            );
+        } 
 
         return $this;
     }
@@ -38,12 +63,18 @@ class Router extends \Core\Service {
      */
     public function find($url) {
         if ($this->routings) foreach ($this->routings as $regex => $ins) {
-            if (isset($ins['url_prefix'])) {
-                $regex = $ins['url_prefix'] . $regex;
-            }
-            if (!$ins['full_regex']) {
+            if ($ins['url_prefix']) {
+                if ($ins['full_regex']) {
+                    throw new Ex\RouteRegistrationException(
+                        'Route cant provide full_regex and url_prefix at the same time!'
+                    ); 
+                } else {
+                    $regex = '#^' . $ins['url_prefix'] . $regex . '$#';
+                }
+            } else if (!$ins['full_regex']) {
                 $regex = '#^' . $regex . '$#';
             }
+
             if (preg_match($regex, $url, $matches)) {
                 array_shift($matches);
                 return array(
@@ -82,18 +113,15 @@ class Router extends \Core\Service {
     public function engage($req, $url) {
         $data = $this->find($url);
         if ($data) {
-            $response = $this->callInstance($req, $data[0], $data[2], $data[1]);
-            if (!($response instanceof \Http\Response)) {
-                return new \Http\Response($response);
-            } else {
-                return $response;
-            }
+            return \Http\Http::createResponse(
+                $this->callInstance($req, $data[0], $data[2], $data[1])
+            );
         } else {
             $url_arr = str_split($url);
             if (array_pop($url_arr) != '/' && $this->config('add_trailing_slash'))
                 return $this->engage($req, $url . '/');
             else
-                throw new \Routing\Ex\RouteNotFoundException($url);
+                throw new Ex\RouteNotFoundException($url);
         };
     }
 

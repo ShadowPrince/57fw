@@ -21,14 +21,10 @@ class Twig extends \Core\AppDispatcher {
     }
 
     public function __call($func, $args) {
-        if (method_exists($this, $func)) {
-            return call_user_func_array(array($this, $func), $args);
-        } else {
-            $res = call_user_func_array(array($this->env, $func), $args);
-            if (!$res)
-                return $this;
-            else
-                return $res;
-        }
+        $res = call_user_func_array(array($this->env, $func), $args);
+        if (!$res)
+            return $this;
+        else
+            return $res;
     }
 }

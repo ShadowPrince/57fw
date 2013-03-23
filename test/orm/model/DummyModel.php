@@ -2,8 +2,8 @@
 namespace Test\Orm\Model;
 
 class DummyModel extends \Orm\Model {
+    public static $table;
     public static $pkey = 'id';
-    public static $table = 'test_dummy';
 
     public $id = 'new \Orm\Field\IntPKey()';
 

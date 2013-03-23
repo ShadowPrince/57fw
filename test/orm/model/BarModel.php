@@ -2,8 +2,8 @@
 namespace Test\Orm\Model;
 
 class BarModel extends \Orm\Model {
+    public static $table;
     public static $pkey = 'id';
-    public static $table = 'test_bar';
 
     public $id = 'new \Orm\Field\IntPKey()';
     public $foo = 'new \Orm\Field\Varchar(32)';

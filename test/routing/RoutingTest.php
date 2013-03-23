@@ -9,11 +9,7 @@ class RoutingTest extends \PHPUnit_Framework_Testcase {
     public function testRouterCreate() {
         $this->e->register('router', new \Routing\Router());
         $this->e->register('router_dispatcher', new \Routing\RouterDispatcher());
-        $this->e->register('router_dispatcher_response', 
-            new \Routing\RouterDispatcher(array(
-                'engage_response' => true
-            ))
-        );
+        $this->e->register('router_engage_dispatcher', new \Routing\RouterEngageDispatcher());
 
         return $this->e;
     }
@@ -22,7 +18,7 @@ class RoutingTest extends \PHPUnit_Framework_Testcase {
     public function testRegister($e) {
         $r = $e->router;
 
-        $r->register('/', function ($req) {
+        $r->register('/', '', function ($req) {
             return 'x';
         }, null);
         $this->assertEquals($r->engage(new \Http\Request, '/')->getBody(), 'x');
@@ -33,7 +29,7 @@ class RoutingTest extends \PHPUnit_Framework_Testcase {
      */
     public function testRegisterFullRegex($e) {
         $r = $e->router;
-        $r->register('#^/UuDdLlRrBAstart$#i', function ($req) {
+        $r->register('#^/UuDdLlRrBAstart$#i', '', function ($req) {
            return 'y'; 
         }, null, true);
         $this->assertEquals($r->engage(new \Http\Request, '/UuDdLlRrBAstart')->getBody(), 'y');
@@ -49,7 +45,7 @@ class RoutingTest extends \PHPUnit_Framework_Testcase {
 
     /** @depends testRegisterFullRegex */
     public function testDispatcher($e) {
-        $e->router->register('/test/', function ($req) {
+        $e->router->register('/test/', '', function ($req) {
             return new \Http\Response($req->get('x'));
         });
         $e->register('http', new \Http\Http());

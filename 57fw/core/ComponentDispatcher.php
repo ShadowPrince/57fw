@@ -4,7 +4,7 @@ namespace Core;
 /**
  * Dispatcher to work with component
  */
-class ComponentDispatcher extends \Core\AppDispatcher {
+class ComponentDispatcher extends AppDispatcher {
     protected $namespace;
     protected $component;
     protected $models;
@@ -38,7 +38,7 @@ class ComponentDispatcher extends \Core\AppDispatcher {
     }
 
     /**
-     * Proceed component
+     * Engage component
      * @param \Core\Engine
      */
     public function engage($e) {

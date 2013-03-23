@@ -93,7 +93,7 @@ abstract class QuerySet implements \Iterator {
     public static function implode($ar) {
         if (is_array($ar)) 
             return implode(':', $ar);
-        else if ($ar instanceof \Orm\ResultSet) 
+        else if ($ar instanceof QuerySet) 
             return implode(':', $ar->set);
     }
 

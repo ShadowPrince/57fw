@@ -1,7 +1,7 @@
 <?php
 namespace Orm\Field;
 
-class ForeignList extends \Orm\Field\ForeignKey {
+class ForeignList extends ForeignKey {
     protected $type = 'text';
 
     public function setValue($list) {

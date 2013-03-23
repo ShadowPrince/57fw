@@ -1,7 +1,6 @@
 #!/usr/bin/env php
 <?php
 define('CLI', 1);
-
 include 'index.php';
 
 /**
@@ -65,24 +64,40 @@ function dottedPrint ($s) {
 $opts = parseArguments($argv);
 
 print ':: 57fw cli' . PHP_EOL;
-switch (reset($opts)) {
-    case 'modeldb':
-        $model = str_replace('/', '\\', $opts[1]);
-        if (!@class_exists($model)) {
-            die('Class ' . $model . ' dont exists!');
-        }
-        print ':: Preparing database for model ' . $model . PHP_EOL;
-        $m = $e->man($model);
-        $m->prepare($opts, 'dottedPrint');
-        
-    break;
-    case 'syncdb': 
-        print ':: Preparing databases...' . PHP_EOL;
-        prepareDatabase($e, $opts, 'dottedPrint', isset($opts[1]) ? $opts[1] : false);
-        print ':: Done ';
-    break;
+call_user_func_array(array_shift($opts), array($e, $opts));
 
-    default:
-        print '!! Choose your destiny: (modeldb, syncdb, startapp)';
-    break;
+/**
+ * ACTIONS
+ */
+
+function modeldb($e, $opts) {
+    if (!isset($opts[0]))
+        die('!! modeldb require\'s argument (model)');
+    $model = str_replace('/', '\\', array_shift($opts));
+    if (!@class_exists($model)) {
+        die('Class ' . $model . ' dont exists!');
+    }
+    print ':: Preparing database for model ' . $model . PHP_EOL;
+    $m = $e->man($model);
+    $m->prepare($opts, 'dottedPrint');
+}
+
+function syncdb($e, $opts) {
+    if (isset($opts[0])) 
+        $model = $opts[0];
+    else
+        $model = null;
+    print ':: Preparing databases...' . PHP_EOL;
+    prepareDatabase($e, $opts, 'dottedPrint', $model);
+    print ':: Done ';
+}
+
+function runserver($e, $opts) {
+    if (isset($opts[0])) {
+        $url = array_shift($opts);
+    } else {
+        $url = '127.0.0.1:8000';
+    }
+    print ':: Server started at ' . $url;
+    system('php -S ' . $url . ' -t .');
 }

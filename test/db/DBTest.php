@@ -1,5 +1,5 @@
 <?php
-namespace Test\Orm;
+namespace Test\Db;
 
 // @TODO: replace this with mock
 class DummyManager {
@@ -10,14 +10,22 @@ class DummyManager {
 
 class DBTest extends \PHPUnit_Framework_Testcase {
     public function testCreateDB () {
-        $e = new \Core\Engine();
-        $e->register('db', new \Orm\Backend\PDO\PDO(array(
+        return new \Orm\Backend\PDO\PDO(array(
             'uri' => 'mysql:host=localhost;dbname=57fw',
             'user' => 'root',
             'password' => '1',
             'debug' => true
-        )));
-        return $e->db;
+        ));
+    }
+
+    /** @depends testCreateDB */
+    public function testExecuteFail($db) {
+        try {
+            $db->buildExecute('SNOW TABLES');
+            $this->fail('SNOW TABLES must throw exception');
+        } catch (\Orm\Ex\ExecuteException $ex) {}
+
+        return $db;
     }
 
     /** @depends testCreateDB */

@@ -1,9 +1,12 @@
 <?php
 namespace Orm\Field;
 
+/**
+ * @todo cleanup
+ */
 abstract class Field {
-    protected $type, $val, $changed;
-    protected $value = null;
+    public $value;
+    protected $type, $name, $val, $changed;
     protected $params = array();
 
     public function __construct($params=null) {
@@ -33,6 +36,7 @@ abstract class Field {
      * @return string
      */
     public function getName() {return $this->name;}
+    public function setName($str) {$this->name = $str;}
     /**
      * @return mixed
      */ 

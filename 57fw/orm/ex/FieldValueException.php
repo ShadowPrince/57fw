@@ -1,7 +1,7 @@
 <?php
 namespace Orm\Ex;
 
-class FieldValueException extends \Orm\Ex\OrmException {
+class FieldValueException extends OrmException {
     public function __construct($field, $value) {
         if (is_object($value)) {
             $value = '(( DONT CONVERT TO STRING ))';

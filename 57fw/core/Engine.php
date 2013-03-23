@@ -4,11 +4,18 @@ namespace Core;
 /**
  * Main engine class
  */
-class Engine extends \Core\ConfiguredInstance {
-    protected $config;
-    protected $apps;
-    protected $services;
+class Engine extends ConfiguredInstance {
+    protected $apps = array();
+    protected $services = array();
+    protected $handlers = array();
     public $cache;
+
+    public function __construct($config=array()) {
+        $this->config = array(
+            'debug' => false
+        );
+        parent::__construct($config);
+    }
 
     /**
      * Getter for apps
@@ -19,7 +26,7 @@ class Engine extends \Core\ConfiguredInstance {
         if (isset($this->apps[$name]))
             return $this->apps[$name];
         else
-            throw new \Core\Ex\AppNotFoundException($name);
+            throw new Ex\AppNotFoundException($name);
     }
 
     /**
@@ -39,8 +46,14 @@ class Engine extends \Core\ConfiguredInstance {
     public function engage() {
         $responses = array();
         if ($this->apps) foreach ($this->apps as $name => $instance) {
-            if ($instance instanceof \Core\AppDispatcher) {
-                $responses[] = $instance->engage($this); 
+            if ($instance instanceof AppDispatcher) {
+                try {
+                    $responses[] = $instance->engage($this); 
+                } catch (\Exception $ex) {
+                    $ex = $this->engageHandlers($ex);
+                    if (is_object($ex))
+                        throw $ex;
+                }
             }
         } 
 
@@ -74,6 +87,20 @@ class Engine extends \Core\ConfiguredInstance {
      */
     public function getApps() {
         return $this->apps;
+    }
+
+    public function engageHandlers($ex) {
+        if ($this->handlers) foreach ($this->handlers as $handler) {
+            $res = $handler($ex);
+            if (is_object($res))
+                throw $res;
+        } else throw $ex;
+    }
+
+    public function handle($fn) {
+        $this->handlers = array_merge(array($fn), $this->handlers);
+
+        return $this;
     }
 
     /**

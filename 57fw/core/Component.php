@@ -4,7 +4,7 @@ namespace Core;
 /**
  * Interface for components
  */
-abstract class Component extends \Core\ConfiguredInstance {
+abstract class Component extends ConfiguredInstance {
     /**
      * @param \Core\Engine
      */

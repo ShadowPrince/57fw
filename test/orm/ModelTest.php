@@ -39,6 +39,7 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
         $dm->prepare(array(), function ($x) {});
 
         $dm = $e->man('\Test\Orm\Model\FailModel');
+        $dm->prepare(array(), function ($x) {});
 
         $this->__raised = false;
         $dm->prepare(array(), function ($x) {
@@ -70,6 +71,10 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
     /** @depends testPrepare */
     public function testPlainModel($e) {
         $man = $e->man('\Test\Orm\Model\PlainModel');
+        try {
+            $man->get(1);
+            $this->fail('Should throw exception, get() on plain model');
+        } catch (\Orm\Ex\PKeyRequiredException $ex) {}
         $ins = $man->getModelInstance();
         $man->save($ins, 1);
 
@@ -148,6 +153,11 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
             $ins->xyz = 123;
             $this->fail('There is no field xyz, must throw \Orm\Ex\FieldNotFoundException');
         } catch (\Orm\Ex\FieldNotFoundException $ex) {}
+
+        try {
+            $dm->get(666);
+            $this->fail('Should throw exception - there is no 666 record');
+        } catch (\Orm\Ex\RowNotFoundException $ex) {}
 
         $e->cache['dummy'] = $ins;
 
@@ -242,6 +252,9 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
 
     /** @depends testModelGet */
     public function testDrop($e) {
-        $e->db->buildExecute('DROP TABLE test_dummy, test_foo');
+        $tables = array_map(function ($x) {
+            return $x . 'model';
+        }, array('dummy', 'foo', 'fail', 'plain'));
+        $e->db->buildExecute('DROP TABLE ' . implode(', ', $tables));
     }   
 }
