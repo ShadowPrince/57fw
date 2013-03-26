@@ -32,6 +32,11 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
 
     /** @depends testManGetter */
     public function testPrepare($e) {
+        $tables = array_map(function ($x) {
+            return $x . 'model';
+        }, array('dummy', 'foo', 'fail', 'plain'));
+
+        $e->db->buildExecute('DROP TABLE ' . implode(', ', $tables));
         $dm = $e->man('\Test\Orm\Model\DummyModel');
         $dm->prepare(array(), function ($x) {});
 
@@ -237,7 +242,7 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
         $this->assertEquals($model->fkey->id, 1);
         $this->assertEquals($model->fkey->id, 1);
         $this->assertEquals($model->fkeyn, null);
-        $this->assertEquals($model->dt, $this->dt);
+        $this->assertTrue($model->dt instanceof \DateTime);
 
         foreach ($model->fklist as $x) {
             $this->assertEquals($x->id, 1);

@@ -102,6 +102,9 @@ class Engine extends ConfiguredInstance {
      */
     public function register($name, $app) {
         $this->apps[$name] = $app;
+            
+        if ($app instanceof \Core\AppDispatcher)
+            $app->setName($name);
 
         return $this;
     }

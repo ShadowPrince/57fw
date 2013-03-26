@@ -24,6 +24,7 @@ class ConfiguredInstance {
             return $this->config;
         if (isset($this->config[$k]))
             return $this->config[$k];
+        return null;
     }
 
     public function setParam($k, $v) {

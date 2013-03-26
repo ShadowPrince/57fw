@@ -7,14 +7,14 @@ namespace Orm\Field;
 abstract class Field extends \Core\ConfiguredInstance {
     public $value;
     protected $type, $name, $val, $changed;
-    protected $params = array();
+    protected $config = array();
 
     public function __construct($config=array()) {
-        if ($this->config('value') !== null)
-            $this->setValue($this->config('value'));
-
         parent::__construct($config);
 
+        if ($this->config('value')) {
+            $this->setValue($this->config('value'));
+        }
     }
     
     public function isChanged() {

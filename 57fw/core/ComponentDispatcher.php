@@ -39,7 +39,7 @@ class ComponentDispatcher extends AppDispatcher {
      * @param callback 
      */
     public function prepareDatabase($e, $opts, $print_callback) {
-        $this->models = $this->getClasses($this->namespace . '\\Model');
+        $this->models = $this->getModels();
         foreach ($this->models as $model) {
             $m = $e->man($model);
             $m->prepare($opts, $print_callback);
@@ -55,11 +55,19 @@ class ComponentDispatcher extends AppDispatcher {
     }
    
     /**
-     * Get name of component
+     * Get namespace of component
      * @return string
      */
-    public function getName() {
+    public function getNamespace() {
         return $this->namespace;
+    }
+
+    /**
+     * Get models
+     * @return array
+     */
+    public function getModels() {
+        return $this->getClasses($this->namespace . '\\Model');
     }
 
     /**
@@ -71,10 +79,13 @@ class ComponentDispatcher extends AppDispatcher {
         $realpath = strtolower(str_replace('\\', '/', $path));
         if (substr($realpath, 0, 1) == '/')
             $realpath = substr($realpath, 1); 
+
         $classes = array();
+
         $dir = opendir($realpath);
         if (!$dir)
             return array();
+
         while (false !== ($file = readdir($dir))) {
             $info = pathinfo($realpath . '/' . $file);
             if ($info['extension'] == 'php') {

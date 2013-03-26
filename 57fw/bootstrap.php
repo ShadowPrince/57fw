@@ -38,6 +38,7 @@ spl_autoload_register(function ($classname) {
         'Routing',
         'Twig',
         'Form',
+        'Admin'
     );
 
     if (array_search($parts[0], $fw_namespaces) !== false)

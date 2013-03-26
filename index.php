@@ -24,6 +24,7 @@ $e
         'url_prefix' => '/',
         'profile_model' => '\Uac\Model\Profile'
     )))
+    ->register('admin', new \Core\ComponentDispatcher('\Admin\Admin'))
     ->register('twig', (new \Twig\Twig(array(
         'path' => 'tpl',
         'cache' => 'tpl/cache',
@@ -37,21 +38,9 @@ $e
 ;
 
 $e->router->register('/', function ($req) use ($e) {
-    class XForm extends \Form\Form {
-        protected $model = '\Uac\Model\User';
-    }
-
-    $f = (new XForm($e, $req->post ? $req->post : $req->user))
-        ->setModel(get_class($req->user));
-    print $f->render($e);
-    if ($f->isValid())
-        var_dump($f->getInstance());
-
     return $e->twig->render('mainpage.html');
 });
-$e->router->register('/test', function ($req) use ($e) {
-        return $req->user;
-    })->validate('\Uac\Validators::logged')->bind('1');
+$e->admin->register($e->uac);
 
 if (!defined('CLI')) {
     print $e->engage();

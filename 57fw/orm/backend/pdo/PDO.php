@@ -365,7 +365,7 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
 
         if ($field instanceof \Orm\Field\PrimaryKey) {
             $params[] = 'PRIMARY KEY';
-            if ($field->config('auto_increment') != false)
+            if ($field->config('auto_increment'))
                 $params[] = 'AUTO_INCREMENT';
         }
 
