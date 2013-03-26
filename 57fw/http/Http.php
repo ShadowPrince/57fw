@@ -3,11 +3,9 @@ namespace Http;
 
 /**
  * Service for HTTP workflow
- * @TODO: abort response
- * @TODO: redirect
  */
 class Http extends \Core\Service {
-    protected $response, $request;
+    protected $response, $request, $abort;
 
     public function __construct($config=array()) {
         $this->config = array(
@@ -28,6 +26,17 @@ class Http extends \Core\Service {
         );
     }
 
+    public function abort($res) {
+        $this->abort = $res;
+
+        return $this;
+    }
+
+    /**
+     * Create response from mixed input
+     * @param mixed
+     * @return \Http\Response
+     */
     public static function createResponse($res) {
         if ($res instanceof Response)
             return $res;
@@ -50,6 +59,10 @@ class Http extends \Core\Service {
         return $this->response;
     }
 
+    public function getAbort() {
+        return $this->abort;
+    }
+
     public function setResponse($res) {
         $this->response = $res;
 
@@ -65,19 +78,24 @@ class Http extends \Core\Service {
      * @return string
      */
     public function engageResponse() {
-        if (!$this->getResponse()) 
+        if ($this->getAbort())
+            $res = $this->getAbort();
+        else
+            $res = $this->getResponse();
+
+        if (!$res)
             throw new Ex\NoResponseProvidedException();
 
-        if ($this->getResponse()->getCookies())
-            foreach ($this->getResponse()->getCookies() as $args) {
+        if ($res->getCookies())
+            foreach ($res->getCookies() as $args) {
                 call_user_func_array('setcookie', $args);
             }
 
-        if ($this->getResponse()->getHeaders())
-            foreach ($this->getResponse()->getHeaders() as $header) {
+        if ($res->getHeaders())
+            foreach ($res->getHeaders() as $header) {
                 header($header);
             }
 
-        return $this->getResponse()->getBody();
+        return $res->getBody();
     }
 }

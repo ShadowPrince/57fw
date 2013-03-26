@@ -15,8 +15,22 @@ class Twig extends \Core\AppDispatcher {
     }
 
     public function engage($e) {
-        if ($e->http) {
+        if ($e->appExists('http')) {
             $this->addGlobal('req', $e->http->getRequest());
+        } 
+        if ($e->appExists('router')) {
+            $fn = new \Twig_SimpleFunction(
+                'mkurl', 
+                function () use ($e) {
+                    return call_user_func_array(
+                        array($e->router, 'make'),
+                        func_get_args()
+                    );
+                }
+            );
+            $this->addFunction(
+                $fn
+            );
         }
     }
 
@@ -24,7 +38,7 @@ class Twig extends \Core\AppDispatcher {
         $res = call_user_func_array(array($this->env, $func), $args);
         if (!$res)
             return $this;
-        else
+        else 
             return $res;
     }
 }

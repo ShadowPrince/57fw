@@ -23,7 +23,7 @@ class ForeignKey extends KeyField {
     }
 
     public function getManager($getter) {
-        return call_user_func_array($getter, array($this->model));
+        return call_user_func($getter, $this->model);
     }
 
     public function setValue($ins) {

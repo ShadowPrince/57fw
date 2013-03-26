@@ -14,13 +14,22 @@ class ComponentDispatcher extends AppDispatcher {
      * @param array
      */
     public function __construct($component, $config=array()) {
-        $this->component = $component;
+        $this->component = new $component($config);
+        $this->config = $this->component->config;
 
         $ns = explode('\\', $component);
         array_pop($ns);
         $this->namespace = implode('\\', $ns);
 
-        parent::__construct($config);
+        parent::__construct($this->config);
+    }
+
+    public function __call($fn, $args) {
+        return call_user_func_array(array($this->component, $fn), $args);
+    }
+
+    public function config($k=null) {
+        return call_user_func_array(array($this->component, 'config'), func_get_args());
     }
 
     /**
@@ -42,7 +51,7 @@ class ComponentDispatcher extends AppDispatcher {
      * @param \Core\Engine
      */
     public function engage($e) {
-        (new $this->component($this->config))->engage($e);
+        $this->component->engage($e);
     }
    
     /**

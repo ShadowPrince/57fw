@@ -7,6 +7,7 @@ $e = new \Core\Engine(array(
     'debug' => 1
 ));
 $e
+    ->register('validators', new \Core\ValidatorsCase())
     ->register('http', (new Http\Http()))
     ->register('router', (new Routing\Router(array(
         'add_trailing_slash' => 1
@@ -28,22 +29,16 @@ $e
         'cache' => 'tpl/cache',
         'debug' => $e->config('debug')
     ))))
+    ->register('rd', new \Routing\RouterDispatcher())
+    ->register('red', new \Routing\RouterEngageDispatcher())
 ;
 
-$e->registerArray(array(
-    'router_dispatcher' => new \Routing\RouterDispatcher(),
-    'router_engage_dispatcher' => new \Routing\RouterEngageDispatcher()
-));
-
-$e->router->registerArray(array(
-    'user_json' => array(
-        'full_regex' => true,
-        'regex' => '#/USER_JSON/(\d+)#',
-        'instance' => function ($req, $var) use ($e) {
-            return $e->man('\Uac\Model\User')->get($var);
-        }
-    )
-));
+$e->router->register('/', function ($req) use ($e) {
+    return $e->twig->render('mainpage.html');
+});
+$e->router->register('/test/(?P<x>\w+)/(\w+)/', function ($req) use ($e) {
+        return $req->user;
+    })->validate('\Uac\Validators::logged')->bind('1');
 
 if (!defined('CLI')) {
     print $e->engage();

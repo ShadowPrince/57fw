@@ -1,5 +1,5 @@
 <phpunit 
-    stopOnFailure="false" 
+    stopOnFailure="true" 
     bootstrap="bootstrap.php"
     >
 

@@ -2,12 +2,24 @@
 namespace Uac;
 
 class Uac extends \Core\Component {
+    public function __construct($config=array()) {
+        $this->config = array(
+            'login_url' => '/index.php/login',
+            'logged_url' => '/index.php/test'
+        );
+        parent::__construct($config);
+    }
     public function engage($e) {
         $this->e = $e;
 
-        $e->router->register('login/', 'login', array($this, 'login'), $this);
-        $e->router->register('logout/', 'logout', array($this, 'logout'), $this);
-        $e->router->register('register/', 'register', array($this, 'register'), $this);
+        $e->router->register('login/', array($this, 'login'), $this)
+            ->validate('\Uac\Validators::notLogged');
+
+        $e->router->register('logout/', array($this, 'logout'), $this)
+            ->validate('\Uac\Validators::logged');
+
+        $e->router->register('register/', array($this, 'register'), $this)
+            ->validate('\Uac\Validators::notLogged');
 
         $this->cookieLogin();
     }

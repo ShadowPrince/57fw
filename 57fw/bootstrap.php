@@ -1,4 +1,31 @@
 <?php
+
+function var_str($var) {
+    try {
+        $str = '"' . $var . '"';
+    } catch (\ErrorException $ex) {
+        $str = '"NO_STR"';
+    }
+
+    $str .= ' ' . gettype($var);
+
+    if ($var === null) {
+        $str = 'NULL';
+    }
+
+    if (is_string($var)) {
+        $str .= '(' . strlen($var) . ')';
+    }
+    if (is_array($var)) {
+        $str .= '(' . count($var) . ')';
+    } 
+    if (is_object($var)) {
+        $str .= '(' . serialize($var) . ')';
+    }
+
+    return $str;
+}
+
 spl_autoload_register(function ($classname) {
     $parts = explode('\\', $classname);
     $class = array_pop($parts);
@@ -17,7 +44,7 @@ spl_autoload_register(function ($classname) {
 
     $namespace = strtolower(implode(DIRECTORY_SEPARATOR, $parts));
 
-    $path = $namespace . DIRECTORY_SEPARATOR . $class . '.php';
+    $path = __DIR__ . '/../' . $namespace . DIRECTORY_SEPARATOR . $class . '.php';
 
     if (is_file($path))
         include $path;

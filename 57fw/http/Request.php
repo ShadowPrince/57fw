@@ -88,4 +88,11 @@ class Request {
         return $this->server['SERVER_NAME'];
     }
 
+    /**
+     * @return string
+     */
+    public function getRemoteAddr() {
+        return $this->server['REMOTE_ADDR'];
+    }
+
 }

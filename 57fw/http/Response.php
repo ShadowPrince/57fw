@@ -12,8 +12,14 @@ class Response {
     /**
      * @param string
      */
-    public function __construct($body) {
+    public function __construct($body='') {
         $this->body = $body;
+    }
+
+    public function redirect($to) {
+        $this->addHeader("Location: " . $to);
+
+        return $this;
     }
 
     /**
@@ -29,6 +35,7 @@ class Response {
      */
     public function setBody($body) {
         $this->body = $body;
+
         return $this;
     }
 
@@ -40,6 +47,7 @@ class Response {
         if (is_array($header))
             return $this->addHeaders($header);
         $this->headers[] = $header;
+
         return $this;
     }
 
@@ -49,6 +57,7 @@ class Response {
      */
     public function addHeaders($headers) {
         $this->headers = array_merge($this->headers, $headers);
+
         return $this;
     }
 
@@ -64,6 +73,7 @@ class Response {
      */
     public function setCookie() {
         $this->cookies[] = func_get_args();
+
         return $this;
     }
 
@@ -73,6 +83,7 @@ class Response {
      */
     public function setCookies($cookies) {
         $this->cookies = array_merge($this->cookies, $cookies);
+
         return $this;
     }
 

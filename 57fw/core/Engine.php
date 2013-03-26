@@ -39,6 +39,10 @@ class Engine extends ConfiguredInstance {
         return call_user_func_array($this->apps[$func], array_merge(array($this), $args));
     }
 
+    public function engageApp($app) {
+        return $app->engage($this);
+    }
+
     /**
      * Engage engine
      * @return string
@@ -46,13 +50,30 @@ class Engine extends ConfiguredInstance {
     public function engage() {
         $responses = array();
         if ($this->apps) foreach ($this->apps as $name => $instance) {
+            $callback = null;
             if ($instance instanceof AppDispatcher) {
+                $callback = array($instance, 'engage');
+            } else if (is_callable($instance)) {
+                if (is_string($instance) || is_array($instance)) {
+                    $f = new \ReflectionMethod($instance);
+                } else if ($instance instanceof \Closure) {
+                    $f = new \ReflectionFunction($instance);
+                }
+
+                if (
+                    count($f->getParameters()) == 1
+                    &&
+                    $f->getParameters()[0]->getName() == 'e'
+                ) {
+                    $callback = $instance($this);
+                }
+            }
+
+            if ($callback) {
                 try {
-                    $responses[] = $instance->engage($this); 
+                    $responses[] = call_user_func($callback, $this); 
                 } catch (\Exception $ex) {
-                    $ex = $this->engageHandlers($ex);
-                    if (is_object($ex))
-                        throw $ex;
+                    $this->engageHandlers($ex);
                 }
             }
         } 
@@ -78,6 +99,14 @@ class Engine extends ConfiguredInstance {
         }
 
         return $this;
+    }
+
+    /**
+     * @param string
+     * @return bool
+     */
+    public function appExists($name) {
+        return isset($this->apps[$name]);
     }
 
     /**
