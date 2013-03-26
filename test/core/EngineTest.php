@@ -37,7 +37,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase {
      * @depends testCreate
      */
     public function testConfiguredInstance($e) {
-        $e->setConfig('k', 'v');
+        $e->setParam('k', 'v');
         $this->assertEquals($e->config('k'), 'v');
 
         return $e;
@@ -67,7 +67,7 @@ class EngineTest extends \PHPUnit_Framework_TestCase {
         try {
             $e->not_found_123;
             $this->fail('Engine __get of not exists app must throw exception!');
-        } catch (\Core\Ex\AppNotFoundException $ex) {}
+        } catch (\Core\Ex\AppNotExistsException $ex) {}
     }
 
     /** @depends testRegister */

@@ -357,15 +357,15 @@ class PDO extends \Core\Service implements \Orm\Backend\GeneralBackend {
      */
     protected function provideField($field) {
         $params = array('`' . $field->getName() . '` ' . strtoupper($field->getType()));
-        if ($field->param('null') != true)
+        if ($field->config('null') != true)
             $params[] = 'NOT NULL';
 
-        if ($field->param('uniq'))
+        if ($field->config('uniq'))
             $params[] = 'UNIQUE';
 
         if ($field instanceof \Orm\Field\PrimaryKey) {
             $params[] = 'PRIMARY KEY';
-            if ($field->param('auto_increment') != false)
+            if ($field->config('auto_increment') != false)
                 $params[] = 'AUTO_INCREMENT';
         }
 

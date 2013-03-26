@@ -37,6 +37,7 @@ spl_autoload_register(function ($classname) {
         'Orm',
         'Routing',
         'Twig',
+        'Form',
     );
 
     if (array_search($parts[0], $fw_namespaces) !== false)

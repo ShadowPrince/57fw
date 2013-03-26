@@ -26,7 +26,7 @@ class Engine extends ConfiguredInstance {
         if (isset($this->apps[$name]))
             return $this->apps[$name];
         else
-            throw new Ex\AppNotFoundException($name);
+            throw new Ex\AppNotExistsException($name);
     }
 
     /**
@@ -82,6 +82,19 @@ class Engine extends ConfiguredInstance {
     }
 
     /**
+     * Ln -s $app $alias
+     * @param string
+     * @param string
+     * @return \Core\Engine
+     */
+    public function alias($app, $alias) {
+        if (isset($this->apps[$app]))
+            $this->apps[$alias] = &$this->apps[$app];
+        else
+            throw new Ex\AppNotExistsException($app);
+    }
+
+    /**
      * Register app
      * @param string
      * @param \Core\AppDispatcher
@@ -93,6 +106,11 @@ class Engine extends ConfiguredInstance {
         return $this;
     }
 
+    /**
+     * Register array of apps!
+     * @param array
+     * @return \Core\Engine
+     */
     public function registerArray($apps) {
         if ($apps) foreach ($apps as $k => $app) {
             $this->register($k, $app);

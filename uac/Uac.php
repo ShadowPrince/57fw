@@ -4,11 +4,16 @@ namespace Uac;
 class Uac extends \Core\Component {
     public function __construct($config=array()) {
         $this->config = array(
-            'login_url' => '/index.php/login',
-            'logged_url' => '/index.php/test'
+            'login_url' => function ($e) {
+                return $e->router->make('uac.login');
+            },
+            'logged_url' => function ($e) {
+                return '/index.php/test';
+            },
         );
         parent::__construct($config);
     }
+
     public function engage($e) {
         $this->e = $e;
 

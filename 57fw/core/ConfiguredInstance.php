@@ -26,7 +26,7 @@ class ConfiguredInstance {
             return $this->config[$k];
     }
 
-    public function setConfig($k, $v) {
+    public function setParam($k, $v) {
         $this->config[$k] = $v;
     }
 }

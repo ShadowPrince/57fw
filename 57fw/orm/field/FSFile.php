@@ -5,9 +5,9 @@ class FSFile extends Text {
     public function __construct() {
         call_user_func_array('parent::__construct', func_get_args());
 
-        if (!$this->param('dir'))
+        if (!$this->config('dir'))
             throw new \Orm\Ex\FieldParamException($this, 'dir', 'can\'t be null');
-        if (!$this->param('allowed_types') && !$this->param('all_types'))
+        if (!$this->config('allowed_types') && !$this->config('all_types'))
             throw new \Orm\Ex\FieldParamException($this, 'allowed_types', 'can\'t be empty (and "all_types" not provided)');
 
     }
@@ -16,9 +16,9 @@ class FSFile extends Text {
         if (!$val)
             throw new \Orm\Ex\FieldValueException($this, 'null or empty');
 
-        $dir = $this->param('dir');  
+        $dir = $this->config('dir');  
         $allowed = false;
-        foreach ($this->param('allowed_types') as $regex) {
+        foreach ($this->config('allowed_types') as $regex) {
             if (preg_match($regex, $val['type'])) {
                 $allowed = true;
                 break;
@@ -38,7 +38,7 @@ class FSFile extends Text {
     public function getValue() {
         $ex = explode('.', parent::getValue());
         $ex = array_pop($ex);
-        $path = $this->param('dir')  
+        $path = $this->config('dir')  
             . DIRECTORY_SEPARATOR 
             . md5(parent::getValue())
             . '.' 

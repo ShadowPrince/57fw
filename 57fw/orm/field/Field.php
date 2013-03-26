@@ -4,24 +4,17 @@ namespace Orm\Field;
 /**
  * @todo cleanup
  */
-abstract class Field {
+abstract class Field extends \Core\ConfiguredInstance {
     public $value;
     protected $type, $name, $val, $changed;
     protected $params = array();
 
-    public function __construct($params=null) {
-        if ($params) 
-            $this->params = $this->params + $params;
+    public function __construct($config=array()) {
+        if ($this->config('value') !== null)
+            $this->setValue($this->config('value'));
 
-        if ($this->param('value') !== null)
-            $this->setValue($this->param('value'));
+        parent::__construct($config);
 
-    }
-
-    public function param($k) {
-        if (isset($this->params[$k]))
-            return $this->params[$k];
-        else return null;
     }
     
     public function isChanged() {

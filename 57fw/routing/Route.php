@@ -110,10 +110,12 @@ class Route {
     public function getRegex() {
         if ($this->isFullRegex())
             return $this->regex;
+
         if ($this->getPrefix())
             $prefix = $this->getPrefix();
         else
             $prefix = '';
+
         return '#^' . $prefix . $this->regex . '$#i';
     }
 

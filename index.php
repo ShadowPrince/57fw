@@ -29,19 +29,31 @@ $e
         'cache' => 'tpl/cache',
         'debug' => $e->config('debug')
     ))))
+    ->register('twig_string', (new \Twig\Twig(array(
+        'loader' => 'string'
+    ))))
     ->register('rd', new \Routing\RouterDispatcher())
     ->register('red', new \Routing\RouterEngageDispatcher())
 ;
 
 $e->router->register('/', function ($req) use ($e) {
+    class XForm extends \Form\Form {
+        protected $model = '\Uac\Model\User';
+    }
+
+    $f = (new XForm($e, $req->post ? $req->post : $req->user))
+        ->setModel(get_class($req->user));
+    print $f->render($e);
+    if ($f->isValid())
+        var_dump($f->getInstance());
+
     return $e->twig->render('mainpage.html');
 });
-$e->router->register('/test/(?P<x>\w+)/(\w+)/', function ($req) use ($e) {
+$e->router->register('/test', function ($req) use ($e) {
         return $req->user;
     })->validate('\Uac\Validators::logged')->bind('1');
 
 if (!defined('CLI')) {
     print $e->engage();
-
     print '<br /><small>time: ' . (microtime(1) - START) . '</small>';
 }

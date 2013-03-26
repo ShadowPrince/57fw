@@ -6,9 +6,10 @@ class DateTime extends Field {
     public static $format = 'Y-m-d H:i:s';
 
     public function getValue() {
-        if (!$this->value && $this->param('auto'))
+        if (!$this->value && $this->config('auto'))
             $this->value = (new \DateTime())->format($this->format);
-        $dt = \DateTime::createFromFormat($this->format, $this->value);
+
+        $dt = \DateTime::createFromFormat(static::$format, $this->value);
 
         return $dt;
     }
@@ -17,7 +18,7 @@ class DateTime extends Field {
         if (!$val) {
             throw new \Orm\Ex\FieldValueException($this, $val);
         } else if ($val instanceof \DateTime) {
-            parent::setValue($val->format(self::$format));
+            parent::setValue($val->format(static::$format));
             return $this;
         } else if (is_string($val)) {
             $dt = \DateTime::createFromFormat(
