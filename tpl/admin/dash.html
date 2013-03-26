@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% block script %}
+    $('#admin-dash-tabs').tabs({
+        itemsSelector: 'li'
+    });
+
+{% endblock %}
+{% block content %}
+<h1>57fw::Admin site</h1>
+<ul class="-tabs -big" id="admin-dash-tabs">
+    {% for c in models %}
+    <li data-tabs-target="#{{ c.name }}-models" class="{% if loop.first %}_active_{% endif %}">
+        <a>{{ c.name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+{% for c in models %}
+<div id="{{ c.name }}-models" style="{% if not loop.first %}display: none{% endif %}">
+    <table class="-table _striped_ _hovered_">
+        <tbody>
+            {% for model in c.models %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        <a href="{{ mkurl('admin.show', mkmodel(model)) }}">
+                            {{ model }}
+                        </a>
+                    </td>
+                </tr>
+            {% else %}
+                Nope there.
+            {% endfor %}
+        </tbody>
+    </table> 
+</div>
+{% endfor %}
+
+{% endblock %}

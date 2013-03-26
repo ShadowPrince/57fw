@@ -23,6 +23,7 @@ class Form extends \Core\ConfiguredInstance {
     public function __construct($e, $kv=array()) {
         if ($kv instanceof \Orm\Model) {
             $this->kv = $e->man(get_class($kv))->dissassembleInstance($kv);
+            $this->model = $kv->getClass();
         } else if (isset($kv['__submit'])) {
             $this->submit = true;
             $this->kv = $kv;
@@ -33,6 +34,7 @@ class Form extends \Core\ConfiguredInstance {
     }
 
     protected function createFields() {
+        $this->fields = array();
         if ($this->getModel()) {
             foreach ((new $this->model())->getFields() as $name => $field) {
                 try {
@@ -61,7 +63,6 @@ class Form extends \Core\ConfiguredInstance {
                 $this->getField($k)->setName($k);
                 if (isset($this->kv[$k]))
                     $this->getField($k)->setValue($this->kv[$k]);
-                unset($this->$k);
             }
         }
 
@@ -162,6 +163,7 @@ class Form extends \Core\ConfiguredInstance {
 
     public function setModel($model) {
         $this->model = $model;
+        $this->createFields();
 
         return $this;
     }

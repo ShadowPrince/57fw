@@ -12,6 +12,8 @@ abstract class Model {
         $this->createFields();
     }
 
+    public function populate($e) {}
+
     /**
      * Getter for getting field value instead of class instance
      * @param string
@@ -50,7 +52,10 @@ abstract class Model {
             return $this->getField($fn)->getValue();
         }
     }
-
+    
+    public function getClass() {
+        return get_class($this);
+    }
 
     /**
      * Get primary key field of model
@@ -80,8 +85,6 @@ abstract class Model {
     public function getField($name) {
         return $this->fields[$name];
     }
-
-    public function populate($e) {}
     
     /**
      * createFields by model vars

@@ -89,7 +89,7 @@ class Router extends \Core\Service {
         return str_replace(
             $regex_vars,
             $replace,
-            $regex
+            '/index.php' . $regex
         );
     }
 
@@ -105,6 +105,7 @@ class Router extends \Core\Service {
             ->newInstanceArgs(
                 array_merge(array($this), func_get_args())
             );
+
         return $route;
     }
 

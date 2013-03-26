@@ -27,7 +27,23 @@ class ConfiguredInstance {
         return null;
     }
 
+    /**
+     * Set param
+     * @param mixed
+     * @param mixed
+     * @return \Core\ConfiguredInstance
+     */
     public function setParam($k, $v) {
         $this->config[$k] = $v;
+
+        return $this;
+    }
+
+    /**
+     * Get config array
+     * @return arrau
+     */
+    public function getConfig() {
+        return $this->config;
     }
 }

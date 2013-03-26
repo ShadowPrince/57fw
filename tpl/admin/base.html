@@ -1,0 +1,33 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/maxmertkit.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/maxmertkit-components.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/maxmertkit-animation.css">
+    <script type="text/javascript" src="/static/js/libs/html5shiv.js"></script>
+    <script type="text/javascript" src="/static/js/libs/jquery.js"></script>
+    <script type="text/javascript" src="/static/js/libs/easing.js"></script>
+    <script type="text/javascript" src="/static/js/libs/imagesLoaded.js"></script>
+    <script type="text/javascript" src="/static/js/libs/modernizr.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.affix.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.scrollspy.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.popup.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.tabs.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.modal.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.carousel.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.button.js"></script>
+    <script type="text/javascript" src="/static/js/plugins/maxmertkit.notify.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            {% block script %}{% endblock %}
+        });
+    </script>
+</head>
+<body>
+    {% block content %}{% endblock %} 
+</body>
+</html>

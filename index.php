@@ -19,12 +19,12 @@ $e
         'debug' => $e->config('debug')
     )))
     ->register('man', '\Orm\Manager::manGetter')
+    ->register('admin', new \Core\ComponentDispatcher('\Admin\Admin'))
     ->register('uac', new \Core\ComponentDispatcher('\Uac\Uac', array(
         'secret_token' => '1',
         'url_prefix' => '/',
         'profile_model' => '\Uac\Model\Profile'
     )))
-    ->register('admin', new \Core\ComponentDispatcher('\Admin\Admin'))
     ->register('twig', (new \Twig\Twig(array(
         'path' => 'tpl',
         'cache' => 'tpl/cache',
@@ -41,8 +41,8 @@ $e->router->register('/', function ($req) use ($e) {
     return $e->twig->render('mainpage.html');
 });
 $e->admin->register($e->uac);
+$e->admin->register($e->admin);
 
 if (!defined('CLI')) {
     print $e->engage();
-    print '<br /><small>time: ' . (microtime(1) - START) . '</small>';
 }

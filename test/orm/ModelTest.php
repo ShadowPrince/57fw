@@ -36,7 +36,7 @@ class ModelTest extends \PHPUnit_Framework_Testcase {
             return $x . 'model';
         }, array('dummy', 'foo', 'fail', 'plain'));
 
-        $e->db->buildExecute('DROP TABLE ' . implode(', ', $tables));
+        $e->db->buildExecute('DROP TABLE IF EXISTS ' . implode(', ', $tables));
         $dm = $e->man('\Test\Orm\Model\DummyModel');
         $dm->prepare(array(), function ($x) {});
 

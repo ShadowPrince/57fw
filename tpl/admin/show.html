@@ -1,0 +1,32 @@
+{% extends "admin/base.html" %}
+{% block content %}
+
+<h1>{{ component }}::{{ model }}</h1>
+<table class="-table _striped_ _hovered_">
+    <thead>
+        <tr>
+            {% for name in fields %}
+            <td>{{ name }}</td>
+            {% endfor %}
+            <td>
+                Actions 
+            </td>
+        </tr>
+    </thead>
+    <tbody>
+    {% for i in instances %}
+        <tr>
+            {% for f in i.getFields %}
+                <td>{{ f.forcedValue }}</td>
+            {% endfor %}
+            <td>
+                <div class="-group _small">
+                    <a href="{{ mkurl('admin.edit', mkmodel(i.getClass), i.getPKey.getValue) }}" class="-btn -primary-">Edit</a>
+                    <a href="" class="-btn -warning-">Remove</a>
+                </div>
+            </td>
+        </tr>
+    {% endfor %}    
+    </tbody>
+</table>
+{% endblock %}  

@@ -26,8 +26,12 @@ class Route {
 
         $this->defaultBind($callback);
 
-        if ($app)
-            $this->prefix = $app->config('url_prefix');
+        if ($app) {
+            if ($app->config('url_prefix'))
+                $this->prefix = $app->config('url_prefix');
+            if ($app->config('validators'))
+                $this->validators = $app->config('validators');
+        }
     }
 
     /**

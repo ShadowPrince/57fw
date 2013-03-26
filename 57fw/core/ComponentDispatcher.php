@@ -15,7 +15,7 @@ class ComponentDispatcher extends AppDispatcher {
      */
     public function __construct($component, $config=array()) {
         $this->component = new $component($config);
-        $this->config = $this->component->config;
+        $this->config = $this->component->getConfig();
 
         $ns = explode('\\', $component);
         array_pop($ns);
@@ -82,7 +82,10 @@ class ComponentDispatcher extends AppDispatcher {
 
         $classes = array();
 
-        $dir = opendir($realpath);
+        if (!is_dir($realpath))
+            return array();
+
+        $dir = opendir($realpath); 
         if (!$dir)
             return array();
 
