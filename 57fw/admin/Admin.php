@@ -31,11 +31,59 @@ class Admin extends \Core\Component {
         $e->router->register('dash/', array($this, 'dash'), $this);
         $e->router->register('model/([\w\.]+)/', array($this, 'show'), $this);
         $e->router->register('model/([\w\.]+)/(\d+)/', array($this, 'edit'), $this);
-        $e->router->register('model/([\w\.]+)/(\d+)/(\w+)/', array($this, 'edit_del'), $this);
+        $e->router->register('model/([\w\.]+)/new/', array($this, 'create'), $this);
+        $e->router->register(
+            'model/([\w\.]+)/(\d+)/delete/', 
+            array($this, 'delete'),
+            $this
+        );
     }
 
-    public function edit($req, $model, $pk, $remove=false) {
-        $model = str_replace('.', '\\', $model);
+    public function delete($req, $enc_model, $pk) {
+        $model = str_replace('.', '\\', $enc_model);
+        $component = explode('\\', $model);
+        array_shift($component);
+        $component = array_shift($component);
+        $man = $this->e->man($model);
+
+        $instance = $man->get($pk);
+
+        $man->delete($instance);
+
+        return new \Http\RedirectResponse(
+            $this->e->router->make('admin.show', $enc_model)
+        );
+    }
+
+    public function create($req, $enc_model) {
+        $model = str_replace('.', '\\', $enc_model);
+        $component = explode('\\', $model);
+        array_shift($component);
+        $component = array_shift($component);
+        $man = $this->e->man($model);
+
+        $form = (new \Form\Form($this->e, 
+            $req->post()
+        ))->setModel($model);
+        $form->getField('__submit')->addClass('-btn -primary-');
+
+        if ($form->isValid() && ($data = $form->getData())) {
+            $instance = $man->buildInstance($data);
+            $man->save($instance);
+            return new \Http\RedirectResponse($this->e->router->make(
+                'admin.edit', $enc_model, $instance->getPKey()->getValue()
+            ));
+        }
+
+        return $this->e->twig->render('admin/edit.html', array(
+            'form' => $form,
+            'component' => $component,
+            'model' => $model
+        ));
+    }
+
+    public function edit($req, $enc_model, $pk, $remove=false) {
+        $model = str_replace('.', '\\', $enc_model);
         $component = explode('\\', $model);
         array_shift($component);
         $component = array_shift($component);
@@ -44,8 +92,9 @@ class Admin extends \Core\Component {
         $instance = $man->get($pk);
 
         $form = (new \Form\Form($this->e, 
-            $req->post ? $req->post : $instance
+            $req->post() ? $req->post() : $instance
         ))->setModel($model);
+        $form->getField('__submit')->addClass('-btn -primary-');
         if ($form->isValid() && ($data = $form->getData())) {
             foreach ($data as $k => $v) {
                 if (0 !== strpos($k, '__')) {
@@ -56,7 +105,7 @@ class Admin extends \Core\Component {
         }
 
         return $this->e->twig->render('admin/edit.html', array(
-            'form' => $form->render($this->e),
+            'form' => $form,
             'component' => $component,
             'model' => $model
         ));

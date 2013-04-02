@@ -15,9 +15,9 @@ class Form extends \Core\ConfiguredInstance {
 
     protected $config = array(
         'html' =>
-        '<form class="{{classes}}" action="{{action}}" method="{{method}}" {{enctype}}>{{fields|raw}}</form>',
+        'action="{{action}}" method="{{method}}" {{enctype}}',
         'classes' => array('57fw_form'),
-        'field' => '<p>{{label}} {{content|raw}}</p>'
+        'field' => '<p>{{label}}{{ required }} {{content|raw}}</p>'
     );
 
     public function __construct($e, $kv=array()) {
@@ -28,6 +28,7 @@ class Form extends \Core\ConfiguredInstance {
             $this->submit = true;
             $this->kv = $kv;
         }
+        $this->setParam('classes', array());
         $this->twig = $e->twig_string;
         $this->e = $e;
         $this->createFields();
@@ -36,10 +37,10 @@ class Form extends \Core\ConfiguredInstance {
     protected function createFields() {
         $this->fields = array();
         if ($this->getModel()) {
-            foreach ((new $this->model())->getFields() as $name => $field) {
+            foreach ((new $this->model())->getFields() as $name => $mfield) {
                 try {
-                    if ($field instanceof \Orm\Field\Text)
-                        $field = new Field\Textarea();
+                    if ($mfield instanceof \Orm\Field\Text)
+                        $field = new Field\TextArea();
                     else
                         $field = new Field\Input();
 
@@ -48,8 +49,13 @@ class Form extends \Core\ConfiguredInstance {
                     if (isset($this->kv[$name]))
                         $field->setValue($this->kv[$name]);
 
-                    if (!$field->config('null'))
+                    if (
+                        !$mfield->config('null') 
+                        && 
+                        !($mfield instanceof \Orm\Field\PrimaryKey)
+                    ) {
                         $field->validate(new \Form\Validator\NotEmpty());
+                    }
 
                     $this->fields[$name] = $field;
                 } catch (\ErrorException $ex) {}
@@ -87,35 +93,39 @@ class Form extends \Core\ConfiguredInstance {
     public function render() {
         $content = '';
         foreach ($this->getFields() as $field) {
-            $content .= $this->twig->render(
-                $this->config('field'), 
-                array(
-                    'label' => $field->getLabel() ? $field->getLabel() . ':' : '',
-                    'content' => $field->render($this->twig)
-                )
-            );
+            $content .= $this->renderField($field);
         }
         
+        return $content;
+    }
+
+    public function renderField($field) {
+        return $this->twig->render(
+            $this->config('field'), 
+            array(
+                'label' => $field->getLabel() ? $field->getLabel() . ':' : '',
+                'content' => $field->render($this->twig),
+                'required' => $field->isRequired() ? '*' : ''
+            )
+        );
+    }
+
+    public function renderAttrs() {
         return $this->twig->render(
             $this->config('html'),
             array(
                 'action' => $this->getAction(),
                 'method' => $this->getMethod(),
-                'entype' => $this->getEnctype(),
-                'classes' => implode(', ', $this->getClasses()),
-                'fields' => $content
+                'entype' => $this->getEnctype()
             )
         );
-    }
-
-    public function getClasses() {
-        return $this->config('classes');
     }
 
     public function getData() {
         $data = array();
         foreach ($this->getFields() as $field) {
-            $data[$field->getName()] = $field->getValue();
+            if (0 !== strpos($field->getName(), '__'))
+                $data[$field->getName()] = $field->getValue();
         }
 
         return $data;

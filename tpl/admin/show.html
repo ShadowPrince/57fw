@@ -2,6 +2,7 @@
 {% block content %}
 
 <h1>{{ component }}::{{ model }}</h1>
+<a href="{{ mkurl('admin.edit', mkmodel(model), 'new') }}" class="-btn -primary">New</a>
 <table class="-table _striped_ _hovered_">
     <thead>
         <tr>
@@ -22,7 +23,7 @@
             <td>
                 <div class="-group _small">
                     <a href="{{ mkurl('admin.edit', mkmodel(i.getClass), i.getPKey.getValue) }}" class="-btn -primary-">Edit</a>
-                    <a href="" class="-btn -warning-">Remove</a>
+                    <a href="{{ mkurl('admin.delete', mkmodel(i.getClass), i.getPKey.getValue) }}" class="-btn -warning-">Remove</a>
                 </div>
             </td>
         </tr>

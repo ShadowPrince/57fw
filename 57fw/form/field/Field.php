@@ -24,7 +24,7 @@ class Field extends \Core\ConfiguredInstance {
             array(
                 'name' => $this->getName(),
                 'placeholder' => $this->getPlaceholder(),
-                'classes' => implode(', ', $this->getClasses()),
+                'class' => implode(' ', $this->getClasses()),
                 'value' => $this->getValue(),
                 'kv' => implode(' ', $this->__kv)
             )
@@ -40,6 +40,10 @@ class Field extends \Core\ConfiguredInstance {
         }
     }
 
+    public function isRequired() {
+        return $this->hasValidator('\Form\Validator\NotEmpty');
+    }
+
     public function isValid() {
         foreach ($this->validators as $callback) {
             if (!call_user_func(array($callback, 'validate'), $this)) {
@@ -48,6 +52,11 @@ class Field extends \Core\ConfiguredInstance {
             }
         }
         return true;
+    }
+
+    public function addClass($class) {
+        $this->setParam('classes', array_merge($this->config('classes'), array($class)));
+        return $this;
     }
 
     public function getClasses() {
@@ -86,6 +95,19 @@ class Field extends \Core\ConfiguredInstance {
 
     public function getPlaceholder() {
         return $this->placeholder;
+    }
+
+    public function hasValidator($class) {
+        foreach ($this->getValidators() as $instance) {
+            if ($instance instanceof $class)
+                return true;
+        }
+
+        return false;
+    }
+
+    public function getValidators() {
+        return $this->validators;
     }
 
     public function validate($validator) {

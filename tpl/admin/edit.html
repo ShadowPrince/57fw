@@ -1,5 +1,7 @@
 {% extends "admin/base.html" %}
 {% block content %}
-
-    {{ form|raw }}
+<h2>{{ model }}</h2>
+<form class = "-form" {{ form.renderAttrs|raw }}>
+    {{ form.render|raw }}
+</form>
 {% endblock %}

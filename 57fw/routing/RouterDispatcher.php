@@ -10,6 +10,9 @@ class RouterDispatcher extends \Core\AppDispatcher {
     }
 
     public function engage($e) {
+        if ($e->appExists('twig'))
+            $e->twig->addGlobal('root', $e->router->config('root'));
+
         $e->http->setResponse(
             $e->router->engage(
                 $e->http->getRequest(),

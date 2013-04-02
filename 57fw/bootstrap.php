@@ -26,11 +26,11 @@ function var_str($var) {
     return $str;
 }
 
-spl_autoload_register(function ($classname) {
-    $parts = explode('\\', $classname);
-    $class = array_pop($parts);
+function find_namespace($ns) {
+    $parts = explode('\\', $ns);
     if (!$parts)
         $parts[] = '\\';
+
     $fw_namespaces = array(
         'Core',
         'Http',
@@ -38,16 +38,29 @@ spl_autoload_register(function ($classname) {
         'Routing',
         'Twig',
         'Form',
-        'Admin'
+        'Admin',
+        'Uac'
     );
 
     if (array_search($parts[0], $fw_namespaces) !== false)
-        $parts = array_merge(['57fw'], $parts);
+        $parts = array_merge(array('57fw'), $parts);
 
     $namespace = strtolower(implode(DIRECTORY_SEPARATOR, $parts));
 
-    $path = __DIR__ . '/../' . $namespace . DIRECTORY_SEPARATOR . $class . '.php';
+    $path = __DIR__ . '/../' . $namespace . DIRECTORY_SEPARATOR;
 
+    return $path;
+}
+
+function find_class($classname) {
+    $parts = explode('\\', $classname);
+    $class = array_pop($parts);
+
+    return find_namespace(implode('\\', $parts)) . $class . '.php';
+}
+
+spl_autoload_register(function ($classname) {
+    $path = find_class($classname);
     if (is_file($path))
         include $path;
 });

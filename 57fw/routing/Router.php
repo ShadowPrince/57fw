@@ -89,7 +89,7 @@ class Router extends \Core\Service {
         return str_replace(
             $regex_vars,
             $replace,
-            '/index.php' . $regex
+            $this->config('prefix') . $regex
         );
     }
 

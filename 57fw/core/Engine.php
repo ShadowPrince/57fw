@@ -60,10 +60,11 @@ class Engine extends ConfiguredInstance {
                     $f = new \ReflectionFunction($instance);
                 }
 
+                // if callback takes on argument named 'e'
                 if (
                     count($f->getParameters()) == 1
                     &&
-                    $f->getParameters()[0]->getName() == 'e'
+                    reset($f->getParameters())->getName() == 'e'
                 ) {
                     $callback = $instance($this);
                 }

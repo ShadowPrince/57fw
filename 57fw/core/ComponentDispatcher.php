@@ -76,10 +76,10 @@ class ComponentDispatcher extends AppDispatcher {
      * @return array
      */
     protected function getClasses($path) {
-        $realpath = strtolower(str_replace('\\', '/', $path));
-        if (substr($realpath, 0, 1) == '/')
-            $realpath = substr($realpath, 1); 
-
+        if (0 === strpos($path, '\\'))
+            $path = substr($path, 1);
+        
+        $realpath = find_namespace($path);
         $classes = array();
 
         if (!is_dir($realpath))

@@ -10,7 +10,9 @@ $e
     ->register('validators', new \Core\ValidatorsCase())
     ->register('http', (new Http\Http()))
     ->register('router', (new Routing\Router(array(
-        'add_trailing_slash' => 1
+        'add_trailing_slash' => 1,
+        'root' => '',
+        'prefix' => '/index.php',
     ))))
     ->register('db', new \Orm\Backend\PDO\PDO(array(
         'uri' => 'mysql:host=localhost;dbname=57fw',

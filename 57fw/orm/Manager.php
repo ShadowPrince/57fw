@@ -60,6 +60,20 @@ class Manager extends \Core\Service {
     }
 
     /**
+     * Delete instance by primary key
+     * @param int
+     * @throws \Orm\Ex\OrmException
+     * @return \Orm\Model
+     */
+    public function delete($instance) {
+        if (!$instance->getPKey())
+            throw new \Orm\Ex\PKeyRequiredException('delete');
+        $this->backend->delete($this, array(
+            array("`" . $instance->getPKey()->getName() . "` = ?", $instance->getPKey()->getValue())
+        ));
+    }
+
+    /**
      * Dissassembly instance and return $kv. if $changed will return only changed fields
      * @param \Orm\Model
      * @param bool

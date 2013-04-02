@@ -7,7 +7,8 @@ class Submit extends Field {
         '<input 
             type="submit" 
             value="{{value}}" 
-            name="{{name}}" 
+            name="{{name}}"
+            class="{{ class }}"
         />'
     );
 
