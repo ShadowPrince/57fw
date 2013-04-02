@@ -22,9 +22,15 @@
                 <tr>
                     <td>{{ loop.index }}</td>
                     <td>
-                        <a href="{{ mkurl('admin.show', mkmodel(model)) }}">
-                            {{ model }}
+                        <a 
+                            class="-btn -primary-" 
+                            href="{{ mkurl('admin.show', mkmodel(model.model)) }}"
+                        >
+                            {{ model.model }}
                         </a>
+                    </td>
+                    <td>
+                        {{ model.count }}
                     </td>
                 </tr>
             {% else %}

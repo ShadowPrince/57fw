@@ -1,7 +1,13 @@
 {% extends "admin/base.html" %}
 {% block content %}
-<h2>{{ model }}</h2>
-<form class = "-form" {{ form.renderAttrs|raw }}>
+<h2>Instance of {{ model }}</h2>
+<div class="-group _huge -primary-">
+    <a href="" class="-btn -dark- _unclickable_">GOTO:</a>
+    <a href="{{ mkurl('admin.dash') }}" class="-btn">Dashboard</a>
+    <a href="{{ mkurl('admin.show', mkmodel(model)) }}" class="-btn">Show</a>
+</div>
+
+<form class = "-form _vertical_" {{ form.renderAttrs|raw }}>
     {{ form.render|raw }}
 </form>
 {% endblock %}

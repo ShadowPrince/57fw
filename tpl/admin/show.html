@@ -1,12 +1,21 @@
 {% extends "admin/base.html" %}
 {% block content %}
 
-<h1>{{ component }}::{{ model }}</h1>
-<a href="{{ mkurl('admin.edit', mkmodel(model), 'new') }}" class="-btn -primary">New</a>
+<h2>
+    Instances of {{ model }}
+</h2>
+
+<a href="{{ mkurl('admin.edit', mkmodel(model), 'new') }}" style="float: right" class="-btn -primary">New</a>
+{% if count(fields) > 7 %}
+<p>
+    <div class="-label -warning- _big">{{count(fields) - 7}} field(s) truncated</div>
+</p>
+{% endif %}
+
 <table class="-table _striped_ _hovered_">
     <thead>
         <tr>
-            {% for name in fields %}
+            {% for name in array_slice(fields, 0, 7) %}
             <td>{{ name }}</td>
             {% endfor %}
             <td>
@@ -17,8 +26,8 @@
     <tbody>
     {% for i in instances %}
         <tr>
-            {% for f in i.getFields %}
-                <td>{{ f.forcedValue }}</td>
+            {% for f in array_slice(i.getFields, 0, 7) %}
+                <td>{{ f.forcedValue|truncate(18) }}</td>
             {% endfor %}
             <td>
                 <div class="-group _small">

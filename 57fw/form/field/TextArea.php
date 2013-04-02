@@ -8,6 +8,7 @@ class Textarea extends Field {
             cols="{{cols}}" 
             rows="{{rows}}" 
             name="{{name}}" 
+            class="{{classes}}"
             {{kv}}
             >{{value}}</textarea>',
         'cols' => 50,

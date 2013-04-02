@@ -6,7 +6,7 @@ namespace Core;
  */
 abstract class AppDispatcher extends ConfiguredInstance {
     /**
-     * @param \Core\Engine
+     * @param \Core\Engin
      */
     public abstract function engage($e);
 

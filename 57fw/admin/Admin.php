@@ -27,6 +27,23 @@ class Admin extends \Core\Component {
         $e->twig->addFunction(new \Twig_SimpleFunction('mkmodel', function ($x) {
             return str_replace('\\', '.', $x);
         }));
+        $e->twig->addFunction(
+            new \Twig_SimpleFunction('array_slice', 
+            'array_slice'
+        ));
+        $e->twig->addFunction(
+            new \Twig_SimpleFunction('count', 
+            'count'
+        ));
+        $e->twig->addFilter(
+            new \Twig_SimpleFilter('truncate', 
+            function ($x, $chars) {
+                if (strlen($x) > $chars)
+                    return substr($x, 0, $chars) . '...';
+                else
+                    return $x;
+            }
+        ));
 
         $e->router->register('dash/', array($this, 'dash'), $this);
         $e->router->register('model/([\w\.]+)/', array($this, 'show'), $this);
@@ -62,13 +79,18 @@ class Admin extends \Core\Component {
         $component = array_shift($component);
         $man = $this->e->man($model);
 
-        $form = (new \Form\Form($this->e, 
-            $req->post()
+        $form = (new \Form\Form(
+            $this->e, 
+            $req->post(),
+            array(
+                'field_error_class' => '-error-',
+                'field_required_class' => '-primary-'
+            )
         ))->setModel($model);
+
         $form->getField('__submit')->addClass('-btn -primary-');
 
-        if ($form->isValid() && ($data = $form->getData())) {
-            $instance = $man->buildInstance($data);
+        if ($form->isValid() && ($instance = $form->buildInstance())) {
             $man->save($instance);
             return new \Http\RedirectResponse($this->e->router->make(
                 'admin.edit', $enc_model, $instance->getPKey()->getValue()
@@ -91,9 +113,15 @@ class Admin extends \Core\Component {
 
         $instance = $man->get($pk);
 
-        $form = (new \Form\Form($this->e, 
-            $req->post() ? $req->post() : $instance
+        $form = (new \Form\Form(
+            $this->e, 
+            $req->post() ? $req->post() : $instance,
+            array(
+                'field_error_class' => '-error-',
+                'field_required_class' => '-primary-',
+            )
         ))->setModel($model);
+
         $form->getField('__submit')->addClass('-btn -primary-');
         if ($form->isValid() && ($data = $form->getData())) {
             foreach ($data as $k => $v) {
@@ -113,9 +141,6 @@ class Admin extends \Core\Component {
 
     public function show($req, $model) {
         $model = str_replace('.', '\\', $model);
-        $component = explode('\\', $model);
-        array_shift($component);
-        $component = array_shift($component);
         $man = $this->e->man($model);
         $fields = array_map(function ($field) {
             return $field->getName();
@@ -124,7 +149,6 @@ class Admin extends \Core\Component {
         return $this->e->twig->render('admin/show.html', array(
             'fields' => $fields,
             'instances' => $man->find(),
-            'component' => $component,
             'model' => $model
         ));
     }
@@ -137,7 +161,10 @@ class Admin extends \Core\Component {
                 'models' => array()
             );
             foreach ($arr as $model) {
-                $app['models'][] = $model;
+                $app['models'][] = array(
+                    'model' => $model,
+                    'count' => $this->e->man($model)->find()->count()
+                );
             }
             $models[] = $app;
         }

@@ -16,11 +16,16 @@ class Form extends \Core\ConfiguredInstance {
     protected $config = array(
         'html' =>
         'action="{{action}}" method="{{method}}" {{enctype}}',
-        'classes' => array('57fw_form'),
-        'field' => '<p>{{label}}{{ required }} {{content|raw}}</p>'
+        'field' => '<p><label>{{label}}</label>{{required}} {{content|raw}}</p>',
+
+        'field_class' => 'field',
+        'field_error_class' => 'error',
+        'field_required_class' => 'required',
+
+        'exclude' => array()
     );
 
-    public function __construct($e, $kv=array()) {
+    public function __construct($e, $kv=array(), $config=array()) {
         if ($kv instanceof \Orm\Model) {
             $this->kv = $e->man(get_class($kv))->dissassembleInstance($kv);
             $this->model = $kv->getClass();
@@ -32,12 +37,16 @@ class Form extends \Core\ConfiguredInstance {
         $this->twig = $e->twig_string;
         $this->e = $e;
         $this->createFields();
+
+        parent::__construct($config);
     }
 
     protected function createFields() {
         $this->fields = array();
         if ($this->getModel()) {
             foreach ((new $this->model())->getFields() as $name => $mfield) {
+                if (false !== array_search($name, $this->config('exclude')))
+                    continue;
                 try {
                     if ($mfield instanceof \Orm\Field\Text)
                         $field = new Field\TextArea();
@@ -74,31 +83,55 @@ class Form extends \Core\ConfiguredInstance {
 
     }
 
+    /**
+     * Is form submitted?
+     * @return boolean
+     */
     public function isSubmitted() {
         return $this->submit;
     }   
 
+    /**
+     * Validate fields and return result
+     * @return boolean
+     */
     public function isValid() {
         if (!$this->isSubmitted()) 
             return false;
 
+        $fail = false;
+
         foreach ($this->fields as $field) {
             if (!$field->isValid()) {
-                return false;
+                $fail = true;
             }
+
         }
-        return true;
+        return !$fail;
     }
 
+    /**
+     * Render entire form
+     * @return string
+     */
     public function render() {
         $content = '';
         foreach ($this->getFields() as $field) {
+            $field->addClass($this->config('field_class'));
+            if ($field->isError()) 
+                $field->addClass($this->config('field_error_class'));
+            else if ($field->isRequired())
+                $field->addClass($this->config('field_required_class'));
             $content .= $this->renderField($field);
         }
         
         return $content;
     }
 
+    /**
+     * Render one field
+     * @return string
+     */
     public function renderField($field) {
         return $this->twig->render(
             $this->config('field'), 
@@ -110,6 +143,10 @@ class Form extends \Core\ConfiguredInstance {
         );
     }
 
+    /**
+     * Render <form> attributes
+     * @return string
+     */
     public function renderAttrs() {
         return $this->twig->render(
             $this->config('html'),
@@ -121,6 +158,9 @@ class Form extends \Core\ConfiguredInstance {
         );
     }
 
+    /**
+     * Get form data
+     */
     public function getData() {
         $data = array();
         foreach ($this->getFields() as $field) {
@@ -131,7 +171,14 @@ class Form extends \Core\ConfiguredInstance {
         return $data;
     }
 
-    public function getInstance() {
+    /**
+     * Build instance if form attached to model
+     * @return \Orm\Model
+     */
+    public function buildInstance() {
+        if (!$this->getModel())
+            throw new Ex\ModelRequiredException();
+
         $data = $this->getData();
         foreach ($data as $k => $v) {
             if (0 === strpos($k, '__')) {
@@ -142,35 +189,59 @@ class Form extends \Core\ConfiguredInstance {
         return $this->e->man($this->getModel())->buildInstance($data);
     }
 
+    /**
+     * @param string
+     * @return \Form\Form
+     */
     public function setAction($action) {
         $this->action = $action;
 
         return $this;
     }
 
+    /**
+     * @param string
+     * @return \Form\Form
+     */
     public function setMethod($method) {
         $this->method = $method;
 
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function getAction() {
         return $this->action;
     }
 
+    /**
+     * @return string
+     */
     public function getMethod() {
         return $this->method;
     }
 
+    /**
+     * @return string
+     */
     public function getEnctype() {
         //@TODO: enctype by files in fields
         return "";
     }
 
+    /**
+     * @return string
+     */
     public function getModel() {
         return $this->model;
     }
 
+    /**
+     * @param string
+     * @return \Form\Form
+     */
     public function setModel($model) {
         $this->model = $model;
         $this->createFields();
@@ -178,10 +249,16 @@ class Form extends \Core\ConfiguredInstance {
         return $this;
     }
 
+    /**
+     * @return \Form\Field\Field
+     */
     public function getField($k) {
         return $this->fields[$k];
     }
 
+    /**
+     * @return array
+     */
     public function getFields() {
         return $this->fields;
     }

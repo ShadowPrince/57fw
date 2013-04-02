@@ -2,19 +2,20 @@
 namespace Form\Field;
 
 class Field extends \Core\ConfiguredInstance {
-    protected $val, $name, $placeholder;
+    protected $val;
+    protected $name;
+    protected $placeholder;
+    protected $error;
 
-    protected $__kv = array();
     protected $config = array(
         'html' => '',
     );
-    protected $validators = array(
-    );
+    protected $validators = array();
 
     public function __construct($config=array()) {
-        $this->config['classes'] = array('57fw_field');
         $this->createValidators();
 
+        $this->setParam('classes', array());
         parent::__construct($config);
     }
 
@@ -24,9 +25,8 @@ class Field extends \Core\ConfiguredInstance {
             array(
                 'name' => $this->getName(),
                 'placeholder' => $this->getPlaceholder(),
-                'class' => implode(' ', $this->getClasses()),
-                'value' => $this->getValue(),
-                'kv' => implode(' ', $this->__kv)
+                'classes' => implode(' ', $this->getClasses()),
+                'value' => $this->getValue()
             )
         );
     }
@@ -45,9 +45,9 @@ class Field extends \Core\ConfiguredInstance {
     }
 
     public function isValid() {
-        foreach ($this->validators as $callback) {
+        foreach ($this->getValidators() as $callback) {
             if (!call_user_func(array($callback, 'validate'), $this)) {
-                $this->__kv['class'] = 'error';
+                $this->setError(true);
                 return false;
             }
         }
@@ -61,6 +61,16 @@ class Field extends \Core\ConfiguredInstance {
 
     public function getClasses() {
         return $this->config('classes');
+    }
+
+    public function setError($error) {
+        $this->error = $error;
+
+        return $this;
+    }
+
+    public function isError() {
+        return $this->error;
     }
 
     public function getLabel() {

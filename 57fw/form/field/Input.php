@@ -5,7 +5,7 @@ class Input extends Field {
     protected $config = array(
         'html' =>
         '<input 
-            class="{{clesses}}" 
+            class="{{classes}}" 
             type="text" 
             value="{{value}}" 
             name="{{name}}" 
